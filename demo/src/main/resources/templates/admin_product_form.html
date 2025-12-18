@@ -7,7 +7,7 @@
 <body>
 <div class="container mt-5">
     <h2 th:text="${product.productId == null} ? 'Add Product' : 'Edit Product'"></h2>
-    <form th:action="${product.productId == null} ? '/admin/products/add' : '/admin/products/edit/' + ${product.productId}" method="post">
+    <form th:action="@{/seller/products/add}" method="post">
         <div class="mb-3">
             <label class="form-label">Name</label>
             <input type="text" class="form-control" name="productName" th:value="${product.productName}" required>
@@ -31,9 +31,68 @@
                 <option value="OUT_OF_STOCK">OUT_OF_STOCK</option>
             </select>
         </div>
+        <div class="mb-3">
+            <label class="form-label">Variants</label>
+            <div id="variants-container">
+                <div class="row mb-2 variant-row">
+                    <div class="col">
+                        <input type="text" class="form-control" name="variants[0].color" placeholder="Color" required>
+                    </div>
+                    <div class="col">
+                        <select class="form-select" name="variants[0].size" required>
+                            <option value="S">S</option>
+                            <option value="M">M</option>
+                            <option value="L">L</option>
+                            <option value="XL">XL</option>
+                        </select>
+                    </div>
+                    <div class="col">
+                        <input type="number" class="form-control" name="variants[0].stockQuantity" placeholder="Stock" min="0" required>
+                    </div>
+                    <div class="col-auto">
+                        <button type="button" class="btn btn-danger remove-variant">Remove</button>
+                    </div>
+                </div>
+            </div>
+            <button type="button" class="btn btn-secondary" id="add-variant">Add Variant</button>
+        </div>
         <button type="submit" class="btn btn-primary">Save</button>
-        <a href="/admin/products" class="btn btn-secondary">Cancel</a>
+        <a href="/seller/products" class="btn btn-secondary">Cancel</a>
     </form>
 </div>
+<script>
+    let variantIndex = 1;
+    document.getElementById('add-variant').onclick = function() {
+        const container = document.getElementById('variants-container');
+        const row = document.createElement('div');
+        row.className = 'row mb-2 variant-row';
+        row.innerHTML = `
+            <div class="col">
+                <input type="text" class="form-control" name="variants[${variantIndex}].color" placeholder="Color" required>
+            </div>
+            <div class="col">
+                <select class="form-select" name="variants[${variantIndex}].size" required>
+                    <option value="S">S</option>
+                    <option value="M">M</option>
+                    <option value="L">L</option>
+                    <option value="XL">XL</option>
+                </select>
+            </div>
+            <div class="col">
+                <input type="number" class="form-control" name="variants[${variantIndex}].stockQuantity" placeholder="Stock" min="0" required>
+            </div>
+            <div class="col-auto">
+                <button type="button" class="btn btn-danger remove-variant">Remove</button>
+            </div>
+        `;
+        container.appendChild(row);
+        variantIndex++;
+    };
+    document.getElementById('variants-container').addEventListener('click', function(e) {
+        if (e.target.classList.contains('remove-variant')) {
+            e.target.closest('.variant-row').remove();
+        }
+    });
+</script>
 </body>
 </html>
