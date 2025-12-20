@@ -34,7 +34,6 @@
                 <form th:action="@{'/seller/products/delete/' + ${product.productId}}" method="post" style="display:inline;">
                     <button type="submit" class="btn btn-danger btn-sm">Delete</button>
                 </form>
-                <button class="btn btn-info btn-sm" type="button" data-bs-toggle="collapse" th:attr="data-bs-target='#variants-' + ${product.productId}">View Details</button>
             </td>
         </tr>
         <tr th:each="product : ${products}">
@@ -63,7 +62,7 @@
     </table>
     <a href="/seller/dashboard" class="btn btn-secondary">Back to Dashboard</a>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js" integrity="sha384-OERcA2z8z8z8z8z8z8z8z8z8z8z8z8z8z8z8z8z8z8z8z8z8z8z8z8" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js" integrity="sha384-OERcA2z8z8z8z8z8z8z8z8z8z8z8z8z8z8z8z8z8z8z8z8z8z8z8" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js" integrity="sha384-+0n0x0A0B0C0D0E0F0G0H0I0J0K0L0M0N0O0P0Q0R0S0T0U0V0W0X0Y0Z0" crossorigin="anonymous"></script>
 </body>
 </html>

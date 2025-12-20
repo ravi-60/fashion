@@ -75,10 +75,14 @@ public class ProductService {
     }
 
     public List<OrderInfo> getPlacedOrdersForSeller(Long sellerId) {
-        return orderRepository.findBySellerIdAndStatus(sellerId, OrderInfo.OrderStatus.PLACED);
+        List<OrderInfo> orders = orderRepository.findBySellerIdAndStatus(sellerId, OrderInfo.OrderStatus.PLACED);
+        System.out.println("[DEBUG] getPlacedOrdersForSeller: sellerId=" + sellerId + ", orders.size=" + orders.size());
+        return orders;
     }
 
     public List<OrderInfo> getClosedOrdersForSeller(Long sellerId) {
-        return orderRepository.findBySellerIdAndStatusIn(sellerId, List.of(OrderInfo.OrderStatus.DELIVERED, OrderInfo.OrderStatus.CANCELLED));
+        List<OrderInfo> orders = orderRepository.findBySellerIdAndStatusIn(sellerId, List.of(OrderInfo.OrderStatus.DELIVERED, OrderInfo.OrderStatus.CANCELLED));
+        System.out.println("[DEBUG] getClosedOrdersForSeller: sellerId=" + sellerId + ", orders.size=" + orders.size());
+        return orders;
     }
 }
