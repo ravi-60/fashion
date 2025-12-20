@@ -20,6 +20,7 @@
                     <th>Date</th>
                     <th>Status</th>
                     <th>Total Amount</th>
+                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>
@@ -28,15 +29,39 @@
                     <td th:text="${order.orderDate}">2025-01-01</td>
                     <td>
                         <span th:text="${order.status}"
-                            th:class="${order.status.name() == 'DELIVERED' ? 'badge bg-success' : 'badge bg-primary'}">
+                            th:class="${order.status.name() == 'DELIVERED' ? 'badge bg-success' : (order.status.name() == 'CANCELLED' ? 'badge bg-danger' : 'badge bg-primary')}">
                             PLACED
                         </span>
                     </td>
                     <td th:text="'$' + ${order.totalAmount}">$0.00</td>
+                    <td>
+                        <button class="btn btn-danger btn-sm cancel-btn"
+                                th:data-id="${order.orderId}"
+                                th:disabled="${order.status.name() == 'DELIVERED' || order.status.name() == 'CANCELLED'}">Cancel</button>
+                    </td>
                 </tr>
             </tbody>
         </table>
     </div>
+
+    <script>
+        document.querySelectorAll('.cancel-btn').forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const orderId = btn.getAttribute('data-id');
+                fetch('/api/orders/cancel/' + orderId, {method: 'POST'})
+                    .then(resp => {
+                        if (resp.ok) {
+                            // Update status in the row
+                            const row = btn.closest('tr');
+                            row.querySelector('span').textContent = 'CANCELLED';
+                            row.querySelector('span').className = 'badge bg-danger';
+                            btn.disabled = true;
+                        }
+                    });
+            });
+        });
+    </script>
 </body>
 
 </html>

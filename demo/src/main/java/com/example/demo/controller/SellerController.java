@@ -7,10 +7,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.PathVariable;
 import java.util.ArrayList;
 import com.example.demo.model.Variant;
 import com.example.demo.config.CustomUserDetails;
 import com.example.demo.service.ProductService;
+import com.example.demo.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 import com.example.demo.model.Product;
@@ -21,6 +23,9 @@ public class SellerController {
 
     @Autowired
     private ProductService productService;
+
+    @Autowired
+    private OrderService orderService;
 
     @GetMapping("/seller/dashboard")
     public String sellerDashboard(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
@@ -45,13 +50,25 @@ public class SellerController {
 
     @GetMapping("/seller/orders")
     public String listSellerOrders(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
-        model.addAttribute("orders", productService.getOrdersForSeller(userDetails.getUserId()));
-        return "seller_orders";
+        return "redirect:/seller/manage-orders";
+    }
+
+    @GetMapping("/seller/manage-orders")
+    public String manageOrders(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
+        model.addAttribute("orders", productService.getPlacedOrdersForSeller(userDetails.getUserId()));
+        return "seller_manage_orders";
+    }
+
+    @GetMapping("/seller/all-orders")
+    public String allOrders(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
+        model.addAttribute("orders", productService.getClosedOrdersForSeller(userDetails.getUserId()));
+        return "seller_all_orders";
     }
 
     @GetMapping("/seller/products/add")
     public String showAddProductForm(Model model) {
         model.addAttribute("product", new Product());
+        model.addAttribute("formAction", "/seller/products/add");
         return "admin_product_form";
     }
 
@@ -71,6 +88,47 @@ public class SellerController {
         }
         product.setVariants(variants);
         productService.saveProduct(product);
+        return "redirect:/seller/products";
+    }
+
+    @PostMapping("/seller/orders/delivered/{id}")
+    public String markOrderAsDelivered(@PathVariable Long id, @AuthenticationPrincipal com.example.demo.config.CustomUserDetails userDetails) {
+        // Optionally, check if the order belongs to this seller
+        orderService.markAsDelivered(id);
+        return "redirect:/seller/orders";
+    }
+
+    @PostMapping("/seller/orders/cancel/{id}")
+    public String cancelOrder(@PathVariable Long id, @AuthenticationPrincipal com.example.demo.config.CustomUserDetails userDetails) {
+        // Optionally, check if the order belongs to this seller
+        orderService.cancelOrder(id);
+        return "redirect:/seller/orders";
+    }
+
+    @GetMapping("/seller/products/edit/{id}")
+    public String showEditProductForm(@PathVariable Long id, @AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
+        Product product = productService.getProductById(id)
+            .filter(p -> p.getSellerId().equals(userDetails.getUserId()))
+            .orElseThrow();
+        model.addAttribute("product", product);
+        model.addAttribute("formAction", "/seller/products/edit/" + id);
+        return "admin_product_form";
+    }
+
+    @PostMapping("/seller/products/edit/{id}")
+    public String editProduct(@PathVariable Long id, @ModelAttribute Product product, @AuthenticationPrincipal CustomUserDetails userDetails) {
+        product.setProductId(id);
+        product.setSellerId(userDetails.getUserId());
+        productService.saveProduct(product);
+        return "redirect:/seller/products";
+    }
+
+    @PostMapping("/seller/products/delete/{id}")
+    public String deleteProduct(@PathVariable Long id, @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Product product = productService.getProductById(id)
+            .filter(p -> p.getSellerId().equals(userDetails.getUserId()))
+            .orElseThrow();
+        productService.deleteProduct(id);
         return "redirect:/seller/products";
     }
 }

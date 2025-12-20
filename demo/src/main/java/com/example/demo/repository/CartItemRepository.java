@@ -6,4 +6,5 @@ import java.util.List;
 
 public interface CartItemRepository extends JpaRepository<CartItem, Long> {
     List<CartItem> findByCustomer_UserId(Long userId);
+    List<CartItem> findByVariant_VariantIdIn(List<Long> variantIds);
 }

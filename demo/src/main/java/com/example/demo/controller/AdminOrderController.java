@@ -26,4 +26,10 @@ public class AdminOrderController {
         orderService.cancelOrder(id);
         return "redirect:/admin/orders";
     }
+
+    @PostMapping("/delivered/{id}")
+    public String markAsDelivered(@PathVariable Long id) {
+        orderService.markAsDelivered(id);
+        return "redirect:/admin/orders";
+    }
 }

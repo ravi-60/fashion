@@ -28,7 +28,10 @@
             <td th:text="${order.totalAmount}"></td>
             <td>
                 <form th:action="@{'/admin/orders/cancel/' + ${order.orderId}}" method="post" style="display:inline;">
-                    <button type="submit" class="btn btn-danger btn-sm" th:disabled="${order.status.name() == 'CANCELLED'}">Cancel</button>
+                    <button type="submit" class="btn btn-danger btn-sm" th:disabled="${order.status.name() == 'CANCELLED' || order.status.name() == 'DELIVERED'}">Cancel</button>
+                </form>
+                <form th:action="@{'/admin/orders/delivered/' + ${order.orderId}}" method="post" style="display:inline;">
+                    <button type="submit" class="btn btn-success btn-sm" th:disabled="${order.status.name() == 'DELIVERED' || order.status.name() == 'CANCELLED'}">Mark as Delivered</button>
                 </form>
             </td>
             <td>

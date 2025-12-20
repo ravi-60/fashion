@@ -6,4 +6,5 @@ import java.util.List;
 
 public interface VariantRepository extends JpaRepository<Variant, Long> {
     List<Variant> findByProduct_ProductId(Long productId);
+    List<Variant> findByProduct_ProductIdIn(List<Long> productIds);
 }

@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -35,30 +36,36 @@ public class OrderService {
             throw new RuntimeException("Cart is empty");
         }
 
-        BigDecimal total = BigDecimal.ZERO;
-        for (CartItem item : cartItems) {
-            BigDecimal price = item.getVariant().getProduct().getPrice();
-            total = total.add(price.multiply(BigDecimal.valueOf(item.getQuantity())));
-        }
-
         User user = userRepository.findById(userId).orElseThrow();
 
-        OrderInfo order = new OrderInfo();
-        order.setCustomer(user);
-        order.setOrderDate(LocalDate.now());
-        order.setTotalAmount(total);
-        order.setStatus(OrderInfo.OrderStatus.PLACED);
+        // Group cart items by sellerId
+        Map<Long, List<CartItem>> itemsBySeller = cartItems.stream()
+            .collect(java.util.stream.Collectors.groupingBy(item -> item.getVariant().getProduct().getSellerId()));
 
-        OrderInfo savedOrder = orderRepository.save(order);
+        for (var entry : itemsBySeller.entrySet()) {
+            Long sellerId = entry.getKey();
+            List<CartItem> sellerItems = entry.getValue();
+            BigDecimal total = BigDecimal.ZERO;
+            for (CartItem item : sellerItems) {
+                BigDecimal price = item.getVariant().getProduct().getPrice();
+                total = total.add(price.multiply(BigDecimal.valueOf(item.getQuantity())));
+            }
+            OrderInfo order = new OrderInfo();
+            order.setCustomer(user);
+            order.setOrderDate(LocalDate.now());
+            order.setTotalAmount(total);
+            order.setStatus(OrderInfo.OrderStatus.PLACED);
+            order.setSellerId(sellerId);
+            OrderInfo savedOrder = orderRepository.save(order);
 
-        // Mock Payment
-        Payment payment = new Payment();
-        payment.setOrder(savedOrder);
-        payment.setPaymentAmount(total);
-        payment.setPaymentDate(LocalDate.now());
-        payment.setPaymentStatus(Payment.PaymentStatus.SUCCESS);
-        paymentRepository.save(payment);
-
+            // Mock Payment
+            Payment payment = new Payment();
+            payment.setOrder(savedOrder);
+            payment.setPaymentAmount(total);
+            payment.setPaymentDate(LocalDate.now());
+            payment.setPaymentStatus(Payment.PaymentStatus.SUCCESS);
+            paymentRepository.save(payment);
+        }
         cartService.clearCart(userId);
     }
 
@@ -72,8 +79,19 @@ public class OrderService {
 
     public void cancelOrder(Long orderId) {
         orderRepository.findById(orderId).ifPresent(order -> {
-            order.setStatus(OrderInfo.OrderStatus.CANCELLED);
-            orderRepository.save(order);
+            if (order.getStatus() != OrderInfo.OrderStatus.DELIVERED) {
+                order.setStatus(OrderInfo.OrderStatus.CANCELLED);
+                orderRepository.save(order);
+            }
+        });
+    }
+
+    public void markAsDelivered(Long orderId) {
+        orderRepository.findById(orderId).ifPresent(order -> {
+            if (order.getStatus() != OrderInfo.OrderStatus.CANCELLED) {
+                order.setStatus(OrderInfo.OrderStatus.DELIVERED);
+                orderRepository.save(order);
+            }
         });
     }
 

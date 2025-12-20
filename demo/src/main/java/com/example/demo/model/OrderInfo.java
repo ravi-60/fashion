@@ -26,6 +26,9 @@ public class OrderInfo {
     @Column(name = "status")
     private OrderStatus status;
 
+    @Column(name = "seller_id")
+    private Long sellerId;
+
     // @OneToMany(fetch = FetchType.LAZY)
     // @JoinColumn(name = "order_id")
     // private java.util.List<CartItem> cartItems;
@@ -52,4 +55,7 @@ public class OrderInfo {
 
     public OrderStatus getStatus() { return status; }
     public void setStatus(OrderStatus status) { this.status = status; }
+
+    public Long getSellerId() { return sellerId; }
+    public void setSellerId(Long sellerId) { this.sellerId = sellerId; }
 }
