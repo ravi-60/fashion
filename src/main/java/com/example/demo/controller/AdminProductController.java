@@ -6,7 +6,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.util.StringUtils;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 
 @Controller
@@ -25,11 +32,20 @@ public class AdminProductController {
     @GetMapping("/add")
     public String showAddForm(Model model) {
         model.addAttribute("product", new Product());
+        model.addAttribute("formAction", "/admin/products/add");
         return "admin_product_form";
     }
 
     @PostMapping("/add")
-    public String addProduct(@ModelAttribute Product product) {
+    public String addProduct(@ModelAttribute Product product, @RequestParam(name = "image", required = false) MultipartFile image) {
+        if (image != null && !image.isEmpty()) {
+            try {
+                String savedPath = saveProductImage(product.getProductName(), image);
+                product.setImgPath(savedPath);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
         productService.saveProduct(product);
         return "redirect:/admin/products";
     }
@@ -38,12 +54,21 @@ public class AdminProductController {
     public String showEditForm(@PathVariable Long id, Model model) {
         Product product = productService.getProductById(id).orElseThrow();
         model.addAttribute("product", product);
+        model.addAttribute("formAction", "/admin/products/edit/" + id);
         return "admin_product_form";
     }
 
     @PostMapping("/edit/{id}")
-    public String editProduct(@PathVariable Long id, @ModelAttribute Product product) {
+    public String editProduct(@PathVariable Long id, @ModelAttribute Product product, @RequestParam(name = "image", required = false) MultipartFile image) {
         product.setProductId(id);
+        if (image != null && !image.isEmpty()) {
+            try {
+                String savedPath = saveProductImage(product.getProductName(), image);
+                product.setImgPath(savedPath);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
         productService.saveProduct(product);
         return "redirect:/admin/products";
     }
@@ -66,5 +91,17 @@ public class AdminProductController {
         List<Product> products = productService.getProductsBySellerId(Long.valueOf(sellerId));
         model.addAttribute("products", products);
         return "admin_products";
+    }
+
+    private String saveProductImage(String productName, MultipartFile image) throws IOException {
+        String safeName = (productName == null || productName.isBlank()) ? "unnamed" : productName.replaceAll("[^a-zA-Z0-9-_]", "_");
+        String filename = StringUtils.cleanPath(image.getOriginalFilename());
+        Path uploadDir = Paths.get("src/main/resources/static/images/products/" + safeName);
+        if (!Files.exists(uploadDir)) {
+            Files.createDirectories(uploadDir);
+        }
+        Path target = uploadDir.resolve(filename);
+        Files.copy(image.getInputStream(), target, StandardCopyOption.REPLACE_EXISTING);
+        return "/images/products/" + safeName + "/" + filename;
     }
 }

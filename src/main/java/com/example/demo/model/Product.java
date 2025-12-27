@@ -8,6 +8,7 @@ import java.util.List;
 @Entity
 @Table(name = "Product")
 public class Product {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "productId")
@@ -35,6 +36,10 @@ public class Product {
 
     @Column(name = "sellerId")
     private Long sellerId;
+
+    // CHANGED: added image path column (400 chars)
+    @Column(name = "imgpath", length = 400)
+    private String imgPath;
 
     public enum Status {
         AVAILABLE, OUT_OF_STOCK
@@ -65,4 +70,8 @@ public class Product {
 
     public Long getSellerId() { return sellerId; }
     public void setSellerId(Long sellerId) { this.sellerId = sellerId; }
+
+    // CHANGED: getter & setter for imgPath
+    public String getImgPath() { return imgPath; }
+    public void setImgPath(String imgPath) { this.imgPath = imgPath; }
 }

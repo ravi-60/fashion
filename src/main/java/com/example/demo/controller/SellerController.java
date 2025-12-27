@@ -17,6 +17,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 import com.example.demo.model.Product;
 import java.util.Map;
+import org.springframework.web.multipart.MultipartFile;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import org.springframework.util.StringUtils;
 
 @Controller
 public class SellerController {
@@ -73,7 +80,7 @@ public class SellerController {
     }
 
     @PostMapping("/seller/products/add")
-    public String addProduct(@ModelAttribute Product product, @RequestParam Map<String, String> params, @AuthenticationPrincipal com.example.demo.config.CustomUserDetails userDetails) {
+    public String addProduct(@ModelAttribute Product product, @RequestParam Map<String, String> params, @RequestParam(name = "image", required = false) MultipartFile image, @AuthenticationPrincipal com.example.demo.config.CustomUserDetails userDetails) {
         product.setSellerId(userDetails.getUserId());
         // Parse variants from params
         ArrayList<Variant> variants = new ArrayList<>();
@@ -87,6 +94,18 @@ public class SellerController {
             i++;
         }
         product.setVariants(variants);
+
+        // Save image if provided
+        if (image != null && !image.isEmpty()) {
+            try {
+                String savedPath = saveProductImage(product.getProductName(), image);
+                product.setImgPath(savedPath);
+            } catch (IOException e) {
+                // Log error - for now print stacktrace
+                e.printStackTrace();
+            }
+        }
+
         productService.saveProduct(product);
         return "redirect:/seller/products";
     }
@@ -116,9 +135,20 @@ public class SellerController {
     }
 
     @PostMapping("/seller/products/edit/{id}")
-    public String editProduct(@PathVariable Long id, @ModelAttribute Product product, @AuthenticationPrincipal CustomUserDetails userDetails) {
+    public String editProduct(@PathVariable Long id, @ModelAttribute Product product, @RequestParam(name = "image", required = false) MultipartFile image, @AuthenticationPrincipal CustomUserDetails userDetails) {
         product.setProductId(id);
         product.setSellerId(userDetails.getUserId());
+
+        // Save image if provided
+        if (image != null && !image.isEmpty()) {
+            try {
+                String savedPath = saveProductImage(product.getProductName(), image);
+                product.setImgPath(savedPath);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
         productService.saveProduct(product);
         return "redirect:/seller/products";
     }
@@ -130,5 +160,19 @@ public class SellerController {
             .orElseThrow();
         productService.deleteProduct(id);
         return "redirect:/seller/products";
+    }
+
+    private String saveProductImage(String productName, MultipartFile image) throws IOException {
+        // Sanitize product name for filesystem
+        String safeName = (productName == null || productName.isBlank()) ? "unnamed" : productName.replaceAll("[^a-zA-Z0-9-_]", "_");
+        String filename = StringUtils.cleanPath(image.getOriginalFilename());
+        Path uploadDir = Paths.get("src/main/resources/static/images/products/" + safeName);
+        if (!Files.exists(uploadDir)) {
+            Files.createDirectories(uploadDir);
+        }
+        Path target = uploadDir.resolve(filename);
+        Files.copy(image.getInputStream(), target, StandardCopyOption.REPLACE_EXISTING);
+        // Return web-accessible path
+        return "/images/products/" + safeName + "/" + filename;
     }
 }

@@ -7,7 +7,7 @@
 <body>
 <div class="container mt-5">
     <h2 th:text="${product.productId == null} ? 'Add Product' : 'Edit Product'"></h2>
-    <form th:action="${formAction}" method="post">
+    <form th:action="${formAction}" method="post" enctype="multipart/form-data">
         <div class="mb-3">
             <label class="form-label">Name</label>
             <input type="text" class="form-control" name="productName" th:value="${product.productName}" required>
@@ -30,6 +30,14 @@
                 <option value="AVAILABLE">AVAILABLE</option>
                 <option value="OUT_OF_STOCK">OUT_OF_STOCK</option>
             </select>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Product Image</label>
+            <input type="file" class="form-control" name="image" accept="image/*">
+            <div th:if="${product.imgPath}">
+                <p class="mt-2">Current image:</p>
+                <img th:src="@{${product.imgPath}}" alt="Current image" style="max-width:200px; margin-top:10px;">
+            </div>
         </div>
         <div class="mb-3">
             <label class="form-label">Variants</label>
