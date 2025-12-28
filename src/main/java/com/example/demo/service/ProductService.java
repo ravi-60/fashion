@@ -1,5 +1,6 @@
 package com.example.demo.service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -76,7 +77,6 @@ public class ProductService {
 
     public List<OrderInfo> getPlacedOrdersForSeller(Long sellerId) {
         List<OrderInfo> orders = orderRepository.findBySellerIdAndStatus(sellerId, OrderInfo.OrderStatus.PLACED);
-        System.out.println("[DEBUG] getPlacedOrdersForSeller: sellerId=" + sellerId + ", orders.size=" + orders.size());
         return orders;
     }
 
@@ -85,4 +85,22 @@ public class ProductService {
         System.out.println("[DEBUG] getClosedOrdersForSeller: sellerId=" + sellerId + ", orders.size=" + orders.size());
         return orders;
     }
+    
+    public long getTotalProductsForSeller(Long sellerId) {
+        return productRepository.countBySellerId(sellerId);
+    }
+    
+    public long getTotalOrdersForSeller(Long sellerId) {
+        return orderRepository.countBySellerId(sellerId);
+    }
+    
+    public BigDecimal getTotalEarningsForSeller(Long sellerId) {
+        return orderRepository.sumTotalAmountBySeller(sellerId);
+    }
+    
+    public BigDecimal getAverageOrderValueForSeller(Long sellerId) {
+        return orderRepository.findAverageOrderValueBySeller(sellerId);
+    }
+
+
 }

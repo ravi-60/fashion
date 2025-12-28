@@ -1,68 +1,229 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <head>
-    <title>Seller - My Products</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Seller | My Products</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        body {
+            background-color: #f1f5f9;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .dashboard-wrapper {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 270px;
+            background: linear-gradient(180deg, #1e40af, #1e3a8a);
+            color: white;
+            padding: 25px 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar h4 {
+            font-weight: 700;
+            margin-bottom: 35px;
+            letter-spacing: 1px;
+        }
+
+        .sidebar a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 15px;
+            color: #e5e7eb;
+            text-decoration: none;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+        }
+
+        .sidebar a:hover,
+        .sidebar a.active {
+            background-color: rgba(255, 255, 255, 0.18);
+            color: white;
+        }
+
+        .sidebar .logout {
+            margin-top: auto;
+            color: #fecaca;
+        }
+
+        /* Content */
+        .content {
+            flex-grow: 1;
+            padding: 30px 35px;
+        }
+
+        .page-header {
+            margin-bottom: 25px;
+        }
+
+        .page-header h3 {
+            font-weight: 700;
+        }
+
+        .table thead {
+            background-color: #e2e8f0;
+        }
+
+        .variant-table {
+            background: #f8fafc;
+        }
+
+        .badge-status {
+            font-size: 0.8rem;
+        }
+    </style>
 </head>
+
 <body>
-<div class="container mt-5">
-    <h2>My Products</h2>
-    <form method="get" action="/seller/products" class="mb-3">
-        <input type="text" name="search" class="form-control" placeholder="Search by product name...">
-    </form>
-    <a href="/seller/products/add" class="btn btn-success mb-3">Add Product</a>
-    <table class="table table-bordered">
-        <thead>
-        <tr>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Category</th>
-            <th>Price</th>
-            <th>Status</th>
-            <th>Actions</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="product : ${products}">
-            <td th:text="${product.productId}"></td>
-            <td th:text="${product.productName}"></td>
-            <td th:text="${product.category}"></td>
-            <td th:text="${product.price}"></td>
-            <td th:text="${product.status}"></td>
-            <td>
-                <a th:href="@{'/seller/products/edit/' + ${product.productId}}" class="btn btn-primary btn-sm">Edit</a>
-                <form th:action="@{'/seller/products/delete/' + ${product.productId}}" method="post" style="display:inline;">
-                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-                </form>
-            </td>
-        </tr>
-        <tr th:each="product : ${products}">
-            <td colspan="6" style="padding:0; border:none;">
-                <div th:id="'variants-' + ${product.productId}" class="collapse">
-                    <table class="table table-sm table-bordered mb-0">
-                        <thead>
-                        <tr>
-                            <th>Color</th>
-                            <th>Size</th>
-                            <th>Stock</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr th:each="variant : ${product.variants}">
-                            <td th:text="${variant.color}"></td>
-                            <td th:text="${variant.size}"></td>
-                            <td th:text="${variant.stockQuantity}"></td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </td>
-        </tr>
-        </tbody>
-    </table>
-    <a href="/seller/dashboard" class="btn btn-secondary">Back to Dashboard</a>
+
+<div class="dashboard-wrapper">
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <h4>Fashion Store</h4>
+
+        <a href="/seller/dashboard">
+            <i class="bi bi-speedometer2"></i> Dashboard
+        </a>
+
+        <a href="/seller/products" class="active">
+            <i class="bi bi-box-seam"></i> My Products
+        </a>
+
+        <a href="/seller/manage-orders">
+            <i class="bi bi-bag-check"></i> Orders
+        </a>
+
+        <a href="/seller/profile">
+            <i class="bi bi-person-circle"></i> Profile
+        </a>
+
+        <a href="/logout" class="logout">
+            <i class="bi bi-box-arrow-right"></i> Logout
+        </a>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content">
+
+        <!-- Header -->
+        <div class="page-header">
+            <h3>My Products</h3>
+            <p class="text-muted">
+                Manage your listed products, variants, and availability.
+            </p>
+        </div>
+
+        <!-- Actions -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <form method="get" action="/seller/products" class="w-50">
+                <input type="text"
+                       name="search"
+                       class="form-control"
+                       placeholder="Search by product name..."
+                       th:value="${param.search}">
+            </form>
+
+            <a href="/seller/products/add" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Add Product
+            </a>
+        </div>
+
+        <!-- Products Table -->
+        <div class="table-responsive">
+            <table class="table table-bordered align-middle">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Product Name</th>
+                    <th>Category</th>
+                    <th>Price</th>
+                    <th>Status</th>
+                    <th style="width: 200px;">Actions</th>
+                </tr>
+                </thead>
+
+                <tbody>
+                <th:block th:each="product : ${products}">
+
+                    <!-- Product Row -->
+                    <tr>
+                        <td th:text="${product.productId}"></td>
+                        <td th:text="${product.productName}"></td>
+                        <td th:text="${product.category}"></td>
+                        <td>₹<span th:text="${product.price}"></span></td>
+                        <td>
+                            <span class="badge badge-status"
+                                  th:classappend="${product.status.name() == 'AVAILABLE'} ? ' bg-success' : ' bg-secondary'"
+                                  th:text="${product.status}">
+                            </span>
+                        </td>
+                        <td>
+                            <a th:href="@{'/seller/products/edit/' + ${product.productId}}"
+                               class="btn btn-sm btn-outline-primary">
+                                Edit
+                            </a>
+
+                            <button class="btn btn-sm btn-outline-info"
+                                    data-bs-toggle="collapse"
+                                    th:data-bs-target="'#variants-' + ${product.productId}">
+                                Variants
+                            </button>
+
+                            <form th:action="@{'/seller/products/delete/' + ${product.productId}}"
+                                  method="post"
+                                  style="display:inline;">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                    Delete
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+
+                    <!-- Variants Row -->
+                    <tr>
+                        <td colspan="6" class="p-0 border-0">
+                            <div th:id="'variants-' + ${product.productId}" class="collapse">
+                                <table class="table table-sm table-bordered mb-0 variant-table">
+                                    <thead>
+                                    <tr>
+                                        <th>Color</th>
+                                        <th>Size</th>
+                                        <th>Stock Quantity</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr th:each="variant : ${product.variants}">
+                                        <td th:text="${variant.color}"></td>
+                                        <td th:text="${variant.size}"></td>
+                                        <td th:text="${variant.stockQuantity}"></td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </td>
+                    </tr>
+
+                </th:block>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js" integrity="sha384-OERcA2z8z8z8z8z8z8z8z8z8z8z8z8z8z8z8z8z8z8z8z8z8z8z8" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js" integrity="sha384-+0n0x0A0B0C0D0E0F0G0H0I0J0K0L0M0N0O0P0Q0R0S0T0U0V0W0X0Y0Z0" crossorigin="anonymous"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
 </body>
 </html>
