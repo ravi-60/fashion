@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Your Cart | Fashion Store</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            background-color: #f4f6f9;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .cart-card {
+            background: #ffffff;
+            border-radius: 14px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            padding: 20px;
+        }
+
+        .price {
+            font-weight: 600;
+            color: #198754;
+        }
+
+        .table th {
+            background-color: #f8f9fa;
+        }
+
+        .empty-cart {
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 14px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container mt-5">
+
+    <!-- Back -->
+    <a th:href="@{/products}" class="btn btn-outline-secondary mb-4">
+        ← Continue Shopping
+    </a>
+
+    <h2 class="mb-4 fw-bold">Shopping Cart</h2>
+
+    <!-- Empty Cart -->
+    <div th:if="${cartItems.empty}" class="empty-cart">
+        <h4>Your cart is empty</h4>
+        <p class="text-muted mb-3">Looks like you haven’t added anything yet.</p>
+        <a th:href="@{/products}" class="btn btn-dark">Browse Products</a>
+    </div>
+
+    <!-- Cart Items -->
+    <div th:unless="${cartItems.empty}" class="cart-card">
+
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Variant</th>
+                    <th>Price</th>
+                    <th>Qty</th>
+                    <th>Total</th>
+                    <th></th>
+                </tr>
+                </thead>
+
+                <tbody>
+                <tr th:each="item : ${cartItems}">
+                    <td>
+                        <strong th:text="${item.variant.product.productName}">Product</strong>
+                    </td>
+
+                    <td class="text-muted">
+                        <span th:text="${item.variant.size}"></span> /
+                        <span th:text="${item.variant.color}"></span>
+                    </td>
+
+                    <td class="price">
+                        ₹<span th:text="${item.variant.product.price}">0</span>
+                    </td>
+
+                    <td th:text="${item.quantity}">1</td>
+
+                    <td class="price">
+                        ₹<span
+                            th:text="${item.variant.product.price.multiply(new java.math.BigDecimal(item.quantity))}">
+                        </span>
+                    </td>
+
+                    <td>
+                        <form th:action="@{/cart/remove}" method="post">
+                            <input type="hidden" name="cartItemId" th:value="${item.cartItemId}" />
+                            <button type="submit" class="btn btn-outline-danger btn-sm">
+                                Remove
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Checkout -->
+        <div class="d-flex justify-content-end mt-3">
+            <form th:action="@{/cart/checkout}" method="post">
+                <button type="submit" class="btn btn-success btn-lg">
+                    Proceed to Checkout
+                </button>
+            </form>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>

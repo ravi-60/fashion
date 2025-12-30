@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Seller | Product Form</title>
+ 
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+ 
+    <style>
+        body {
+            background-color: #f1f5f9;
+            font-family: 'Segoe UI', sans-serif;
+        }
+ 
+        .dashboard-wrapper {
+            display: flex;
+            min-height: 100vh;
+        }
+ 
+        /* SELLER SIDEBAR */
+        .sidebar {
+            width: 270px;
+            background: linear-gradient(180deg, #1e40af, #1e3a8a);
+            color: white;
+            padding: 25px 20px;
+            display: flex;
+            flex-direction: column;
+        }
+ 
+        .sidebar h4 {
+            font-weight: 700;
+            margin-bottom: 35px;
+        }
+ 
+        .sidebar a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 15px;
+            color: #e5e7eb;
+            text-decoration: none;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+        }
+ 
+        .sidebar a:hover,
+        .sidebar a.active {
+            background-color: rgba(255,255,255,0.18);
+            color: white;
+        }
+ 
+        .sidebar .logout {
+            margin-top: auto;
+            color: #fecaca;
+        }
+ 
+        /* CONTENT */
+        .content {
+            flex-grow: 1;
+            padding: 30px 35px;
+        }
+ 
+        .form-card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            max-width: 900px;
+        }
+    </style>
+</head>
+ 
+<body>
+ 
+<div class="dashboard-wrapper">
+ 
+    <!-- SELLER SIDEBAR -->
+    <div class="sidebar">
+        <h4>Fashion Store</h4>
+ 
+        <a href="/seller/dashboard">
+            <i class="bi bi-speedometer2"></i> Dashboard
+        </a>
+ 
+        <a href="/seller/products" class="active">
+            <i class="bi bi-box-seam"></i> My Products
+        </a>
+ 
+        <a href="/seller/manage-orders">
+            <i class="bi bi-bag-check"></i> Orders
+        </a>
+ 
+        <a href="/seller/profile">
+            <i class="bi bi-person-circle"></i> Profile
+        </a>
+ 
+        <a href="/logout" class="logout">
+            <i class="bi bi-box-arrow-right"></i> Logout
+        </a>
+    </div>
+ 
+    <!-- MAIN CONTENT -->
+    <div class="content">
+ 
+        <a href="/seller/products" class="btn btn-outline-secondary mb-3">
+            ← Back to My Products
+        </a>
+ 
+        <div class="form-card">
+ 
+            <h3 class="mb-4"
+                th:text="${product.productId == null} ? 'Add New Product' : 'Edit Product'">
+            </h3>
+ 
+            <form th:action="${formAction}" method="post" enctype="multipart/form-data">
+ 
+                <div class="mb-3">
+                    <label class="form-label">Product Name</label>
+                    <input type="text" class="form-control"
+                           name="productName"
+                           th:value="${product.productName}" required>
+                </div>
+ 
+                <div class="mb-3">
+                    <label class="form-label">Description</label>
+                    <textarea class="form-control"
+                              name="description"
+                              rows="3"
+                              th:text="${product.description}"></textarea>
+                </div>
+ 
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Category</label>
+                        <input type="text" class="form-control"
+                               name="category"
+                               th:value="${product.category}" required>
+                    </div>
+ 
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Price</label>
+                        <input type="number" step="0.01"
+                               class="form-control"
+                               name="price"
+                               th:value="${product.price}" required>
+                    </div>
+                </div>
+ 
+                <div class="mb-3">
+                    <label class="form-label">Status</label>
+                    <select class="form-select" name="status">
+                        <option value="AVAILABLE">AVAILABLE</option>
+                        <option value="OUT_OF_STOCK">OUT OF STOCK</option>
+                    </select>
+                </div>
+ 
+                <div class="mb-3">
+                    <label class="form-label">Product Image</label>
+                    <input type="file" class="form-control" name="image">
+                    <div th:if="${product.imgPath}">
+                        <img th:src="@{${product.imgPath}}"
+                             class="mt-3 rounded"
+                             style="max-width:200px;">
+                    </div>
+                </div>
+ 
+                <!-- VARIANTS -->
+                <div class="mb-3">
+                    <label class="form-label">Variants</label>
+ 
+                    <div id="variants-container">
+                        <div class="row g-2 mb-2 variant-row">
+                            <div class="col">
+                                <input class="form-control"
+                                       name="variants[0].color"
+                                       placeholder="Color" required>
+                            </div>
+                            <div class="col">
+                                <select class="form-select"
+                                        name="variants[0].size">
+                                    <option>S</option>
+                                    <option>M</option>
+                                    <option>L</option>
+                                    <option>XL</option>
+                                </select>
+                            </div>
+                            <div class="col">
+                                <input type="number"
+                                       class="form-control"
+                                       name="variants[0].stockQuantity"
+                                       placeholder="Stock"
+                                       min="0" required>
+                            </div>
+                            <div class="col-auto">
+                                <button type="button"
+                                        class="btn btn-danger remove-variant">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+ 
+                    <button type="button"
+                            id="add-variant"
+                            class="btn btn-outline-primary mt-2">
+                        + Add Variant
+                    </button>
+                </div>
+ 
+                <button class="btn btn-primary">
+                    Save Product
+                </button>
+ 
+            </form>
+        </div>
+    </div>
+</div>
+ 
+<script>
+let index = 1;
+ 
+document.getElementById('add-variant').onclick = () => {
+    const container = document.getElementById('variants-container');
+    const row = document.createElement('div');
+    row.className = 'row g-2 mb-2 variant-row';
+    row.innerHTML = `
+        <div class="col">
+            <input class="form-control" name="variants[${index}].color" placeholder="Color" required>
+        </div>
+        <div class="col">
+            <select class="form-select" name="variants[${index}].size">
+                <option>S</option><option>M</option><option>L</option><option>XL</option>
+            </select>
+        </div>
+        <div class="col">
+            <input type="number" class="form-control"
+                   name="variants[${index}].stockQuantity" min="0" required>
+        </div>
+        <div class="col-auto">
+            <button type="button" class="btn btn-danger remove-variant">X</button>
+        </div>`;
+    container.appendChild(row);
+    index++;
+};
+ 
+document.addEventListener('click', e => {
+    if (e.target.classList.contains('remove-variant')) {
+        e.target.closest('.variant-row').remove();
+    }
+});
+</script>
+ 
+</body>
+</html>
