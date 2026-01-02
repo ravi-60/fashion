@@ -29,6 +29,9 @@ public class OrderInfo {
     @Column(name = "seller_id")
     private Long sellerId;
 
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private java.util.List<OrderItem> orderItems = new java.util.ArrayList<>();
+
     // @OneToMany(fetch = FetchType.LAZY)
     // @JoinColumn(name = "order_id")
     // private java.util.List<CartItem> cartItems;
@@ -58,4 +61,7 @@ public class OrderInfo {
 
     public Long getSellerId() { return sellerId; }
     public void setSellerId(Long sellerId) { this.sellerId = sellerId; }
+
+    public java.util.List<OrderItem> getOrderItems() { return orderItems; }
+    public void setOrderItems(java.util.List<OrderItem> orderItems) { this.orderItems = orderItems; }
 }

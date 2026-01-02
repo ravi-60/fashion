@@ -39,5 +39,8 @@ public interface OrderRepository extends JpaRepository<OrderInfo, Long> {
     		""")
     		BigDecimal sumTotalRevenue();
 
+    org.springframework.data.domain.Page<OrderInfo> findAll(org.springframework.data.domain.Pageable pageable);
+    org.springframework.data.domain.Page<OrderInfo> findBySellerId(Long sellerId, org.springframework.data.domain.Pageable pageable);
+
 
 }

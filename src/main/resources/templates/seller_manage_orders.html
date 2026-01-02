@@ -113,7 +113,7 @@
             </p>
         </div>
 
-        <!-- ACTION BUTTONS -->
+    <!-- ACTION BUTTONS -->
         <div class="row mb-4">
             <div class="col-md-3">
                 <a href="/seller/manage-orders" class="btn btn-primary w-100">
@@ -124,6 +124,16 @@
                 <a href="/seller/all-orders" class="btn btn-outline-primary w-100">
                     All Orders
                 </a>
+            </div>
+        </div>
+
+        <!-- SEARCH -->
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <form action="/seller/manage-orders" method="get" class="d-flex">
+                    <input type="text" name="search" class="form-control me-2" placeholder="Search by Order ID" th:value="${search}" />
+                    <button type="submit" class="btn btn-outline-secondary">Search</button>
+                </form>
             </div>
         </div>
 
@@ -140,6 +150,7 @@
                     <th>Order ID</th>
                     <th>Customer</th>
                     <th>Date</th>
+                    <th>Items</th>
                     <th>Status</th>
                     <th>Total Amount</th>
                     <th style="width:220px;">Actions</th>
@@ -151,6 +162,23 @@
                     <td th:text="${order.orderId}"></td>
                     <td th:text="${order.customer.username}"></td>
                     <td th:text="${order.orderDate}"></td>
+                    <td>
+                        <ul class="mb-0">
+                            <li th:each="it : ${order.orderItems}">
+                                <strong th:text="${it.variant.product.productName}"></strong>
+                                <span class="text-muted">(</span>
+                                <span th:text="'Variant: ' + ${it.variant.variantId}"></span>
+                                <span class="text-muted"> - </span>
+                                <span th:text="${it.variant.size}"></span>
+                                <span class="text-muted">/</span>
+                                <span th:text="${it.variant.color}"></span>
+                                <span class="text-muted">) x </span>
+                                <span th:text="${it.quantity}"></span>
+                                <span class="text-muted"> @ ₹</span>
+                                <span th:text="${it.unitPrice}"></span>
+                            </li>
+                        </ul>
+                    </td>
                     <td>
                         <span th:text="${order.status}"
                               th:class="'badge ' + 

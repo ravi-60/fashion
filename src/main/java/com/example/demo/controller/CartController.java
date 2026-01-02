@@ -43,6 +43,12 @@ public class CartController {
         return "redirect:/cart";
     }
 
+    @PostMapping("/update")
+    public String updateCartQuantity(@RequestParam Long cartItemId, @RequestParam int quantity) {
+        cartService.updateCartItemQuantity(cartItemId, quantity);
+        return "redirect:/cart";
+    }
+
     @PostMapping("/checkout")
     public String checkout(@AuthenticationPrincipal CustomUserDetails userDetails) {
         orderService.placeOrder(userDetails.getUserId());

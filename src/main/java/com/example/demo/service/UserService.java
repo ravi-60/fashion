@@ -11,7 +11,14 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
-    public List<User> getAllUsers() {
+    public java.util.List<User> getAllUsers() {
         return userRepository.findAll();
+    }
+
+    public org.springframework.data.domain.Page<User> findUsers(String search, org.springframework.data.domain.Pageable pageable) {
+        if (search != null && !search.isEmpty()) {
+            return userRepository.findByUsernameContainingIgnoreCase(search, pageable);
+        }
+        return userRepository.findAll(pageable);
     }
 }

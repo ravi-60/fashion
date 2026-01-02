@@ -111,14 +111,20 @@
             </p>
         </div>
 
+        <!-- SEARCH -->
+        <form method="get" action="/admin/users" class="mb-3 search-box d-flex gap-2">
+            <input type="text" name="search" th:value="${search}" class="form-control" placeholder="Search by username" />
+            <button class="btn btn-primary">Search</button>
+        </form>
+
         <div class="table-responsive">
             <table class="table table-bordered align-middle">
                 <thead>
                 <tr>
-                    <th>User ID</th>
-                    <th>Username</th>
-                    <th>Email</th>
-                    <th>Role</th>
+                    <th><a th:href="@{/admin/users(page=0,sort='userId',dir=${sort=='userId' && dir=='asc' ? 'desc' : 'asc'},search=${search})}">User ID</a></th>
+                    <th><a th:href="@{/admin/users(page=0,sort='username',dir=${sort=='username' && dir=='asc' ? 'desc' : 'asc'},search=${search})}">Username</a></th>
+                    <th><a th:href="@{/admin/users(page=0,sort='email',dir=${sort=='email' && dir=='asc' ? 'desc' : 'asc'},search=${search})}">Email</a></th>
+                    <th><a th:href="@{/admin/users(page=0,sort='role',dir=${sort=='role' && dir=='asc' ? 'desc' : 'asc'},search=${search})}">Role</a></th>
                 </tr>
                 </thead>
 
@@ -133,6 +139,26 @@
                 </tr>
                 </tbody>
             </table>
+        </div>
+
+        <!-- PAGINATION -->
+        <div class="d-flex justify-content-between align-items-center mt-3">
+            <div>
+                <span th:text="'Showing ' + ${userPage.number * userPage.size + 1} + ' - ' + ${userPage.number * userPage.size + userPage.numberOfElements} + ' of ' + ${userPage.totalElements}"></span>
+            </div>
+            <nav>
+                <ul class="pagination mb-0">
+                    <li class="page-item" th:classappend="${userPage.first} ? 'disabled'">
+                        <a class="page-link" th:href="@{/admin/users(page=${userPage.number-1},sort=${sort},dir=${dir},search=${search})}">Previous</a>
+                    </li>
+                    <li class="page-item" th:each="i : ${#numbers.sequence(0, userPage.totalPages-1)}" th:classappend="${userPage.number==i} ? 'active'">
+                        <a class="page-link" th:href="@{/admin/users(page=${i},sort=${sort},dir=${dir},search=${search})}" th:text="${i+1}"></a>
+                    </li>
+                    <li class="page-item" th:classappend="${userPage.last} ? 'disabled'">
+                        <a class="page-link" th:href="@{/admin/users(page=${userPage.number+1},sort=${sort},dir=${dir},search=${search})}">Next</a>
+                    </li>
+                </ul>
+            </nav>
         </div>
 
     </div>

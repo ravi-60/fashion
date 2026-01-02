@@ -7,4 +7,5 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByUsername(String username);
     long countByRole(User.Role role);
+    org.springframework.data.domain.Page<User> findByUsernameContainingIgnoreCase(String username, org.springframework.data.domain.Pageable pageable);
 }

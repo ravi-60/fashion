@@ -15,9 +15,27 @@ public class AdminOrderController {
     private OrderService orderService;
 
     @GetMapping
-    public String listOrders(Model model) {
-        List<OrderInfo> orders = orderService.getAllOrders();
-        model.addAttribute("orders", orders);
+    public String listOrders(@RequestParam(name = "page", required = false, defaultValue = "0") int page,
+                             @RequestParam(name = "sort", required = false, defaultValue = "orderId") String sort,
+                             @RequestParam(name = "dir", required = false, defaultValue = "asc") String dir,
+                             @RequestParam(name = "sellerId", required = false) Long sellerId,
+                             Model model) {
+        int size = 5;
+        org.springframework.data.domain.Sort.Direction direction = "desc".equalsIgnoreCase(dir) ? org.springframework.data.domain.Sort.Direction.DESC : org.springframework.data.domain.Sort.Direction.ASC;
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size, org.springframework.data.domain.Sort.by(direction, sort));
+        org.springframework.data.domain.Page<OrderInfo> orderPage;
+        if (sellerId != null) {
+            orderPage = orderService.findOrdersBySellerId(sellerId, pageable);
+        } else {
+            orderPage = orderService.findOrders(pageable);
+        }
+        model.addAttribute("orderPage", orderPage);
+        model.addAttribute("orders", orderPage.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("pageSize", size);
+        model.addAttribute("sort", sort);
+        model.addAttribute("dir", dir);
+        model.addAttribute("sellerId", sellerId);
         return "admin_orders";
     }
 

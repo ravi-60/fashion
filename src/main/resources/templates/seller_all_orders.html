@@ -128,6 +128,16 @@
             </div>
         </div>
 
+        <!-- SEARCH -->
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <form action="/seller/all-orders" method="get" class="d-flex">
+                    <input type="text" name="search" class="form-control me-2" placeholder="Search by Order ID" th:value="${search}" />
+                    <button type="submit" class="btn btn-outline-secondary">Search</button>
+                </form>
+            </div>
+        </div>
+
         <!-- EMPTY STATE -->
         <div th:if="${orders.empty}" class="alert alert-info">
             No orders found for your products.
@@ -141,6 +151,7 @@
                     <th>Order ID</th>
                     <th>Customer</th>
                     <th>Date</th>
+                    <th>Product Details</th>
                     <th>Status</th>
                     <th>Total Amount</th>
                 </tr>
@@ -151,6 +162,21 @@
                     <td th:text="${order.orderId}"></td>
                     <td th:text="${order.customer.username}"></td>
                     <td th:text="${order.orderDate}"></td>
+                    <td>
+                        <ul class="mb-0">
+                            <li th:each="it : ${order.orderItems}">
+                                <strong th:text="${it.variant.product.productName}"></strong>
+                                <span class="text-muted">(</span>
+                                <span th:text="'Variant: ' + ${it.variant.variantId}"></span>
+                                <span class="text-muted"> - </span>
+                                <span th:text="${it.variant.size}"></span>
+                                <span class="text-muted">/</span>
+                                <span th:text="${it.variant.color}"></span>
+                                <span class="text-muted">) x </span>
+                                <span th:text="${it.quantity}"></span>
+                            </li>
+                        </ul>
+                    </td>
                     <td>
                         <span th:text="${order.status}"
                               th:class="'badge ' + 

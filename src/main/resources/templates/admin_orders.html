@@ -107,16 +107,22 @@
 
         <div class="card-box">
 
+            <!-- SEARCH -->
+            <form method="get" action="/admin/orders" class="mb-3 search-box d-flex gap-2">
+                <input type="text" name="sellerId" th:value="${sellerId}" class="form-control" placeholder="Search by Seller ID" />
+                <button class="btn btn-primary">Search</button>
+            </form>
+
             <table class="table table-bordered align-middle">
                 <thead class="table-light">
                     <tr>
-                        <th>Order ID</th>
-                        <th>Customer</th>
-                        <th>Date</th>
-                        <th>Status</th>
-                        <th>Total</th>
+                        <th><a th:href="@{/admin/orders(page=0,sort='orderId',dir=${sort=='orderId' && dir=='asc' ? 'desc' : 'asc'},sellerId=${sellerId})}">Order ID</a></th>
+                        <th><a th:href="@{/admin/orders(page=0,sort='customer.userId',dir=${sort=='customer.userId' && dir=='asc' ? 'desc' : 'asc'},sellerId=${sellerId})}">Customer</a></th>
+                        <th><a th:href="@{/admin/orders(page=0,sort='orderDate',dir=${sort=='orderDate' && dir=='asc' ? 'desc' : 'asc'},sellerId=${sellerId})}">Date</a></th>
+                        <th><a th:href="@{/admin/orders(page=0,sort='status',dir=${sort=='status' && dir=='asc' ? 'desc' : 'asc'},sellerId=${sellerId})}">Status</a></th>
+                        <th><a th:href="@{/admin/orders(page=0,sort='totalAmount',dir=${sort=='totalAmount' && dir=='asc' ? 'desc' : 'asc'},sellerId=${sellerId})}">Total</a></th>
                         <th>Actions</th>
-                        <th>Seller</th>
+                        <th><a th:href="@{/admin/orders(page=0,sort='sellerId',dir=${sort=='sellerId' && dir=='asc' ? 'desc' : 'asc'},sellerId=${sellerId})}">Seller</a></th>
                     </tr>
                 </thead>
 
@@ -160,6 +166,26 @@
                     </tr>
                 </tbody>
             </table>
+
+            <!-- PAGINATION -->
+            <div class="d-flex justify-content-between align-items-center mt-3">
+                <div>
+                    <span th:text="'Showing ' + ${orderPage.number * orderPage.size + 1} + ' - ' + ${orderPage.number * orderPage.size + orderPage.numberOfElements} + ' of ' + ${orderPage.totalElements}"></span>
+                </div>
+                <nav>
+                    <ul class="pagination mb-0">
+                        <li class="page-item" th:classappend="${orderPage.first} ? 'disabled'">
+                            <a class="page-link" th:href="@{/admin/orders(page=${orderPage.number-1},sort=${sort},dir=${dir},sellerId=${sellerId})}">Previous</a>
+                        </li>
+                        <li class="page-item" th:each="i : ${#numbers.sequence(0, orderPage.totalPages-1)}" th:classappend="${orderPage.number==i} ? 'active'">
+                            <a class="page-link" th:href="@{/admin/orders(page=${i},sort=${sort},dir=${dir},sellerId=${sellerId})}" th:text="${i+1}"></a>
+                        </li>
+                        <li class="page-item" th:classappend="${orderPage.last} ? 'disabled'">
+                            <a class="page-link" th:href="@{/admin/orders(page=${orderPage.number+1},sort=${sort},dir=${dir},sellerId=${sellerId})}">Next</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
 
         </div>
 

@@ -92,14 +92,32 @@ public class SellerController {
 	}
 
 	@GetMapping("/seller/manage-orders")
-	public String manageOrders(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
-		model.addAttribute("orders", productService.getPlacedOrdersForSeller(userDetails.getUserId()));
+	public String manageOrders(@AuthenticationPrincipal CustomUserDetails userDetails, Model model,
+			@RequestParam(value = "search", required = false) String search) {
+		List<com.example.demo.model.OrderInfo> orders = productService.getPlacedOrdersForSeller(userDetails.getUserId());
+		if (search != null && !search.isEmpty()) {
+			String s = search.trim();
+			orders = orders.stream()
+					.filter(o -> o.getOrderId() != null && o.getOrderId().toString().contains(s))
+					.toList();
+		}
+		model.addAttribute("orders", orders);
+		model.addAttribute("search", search);
 		return "seller_manage_orders";
 	}
 
 	@GetMapping("/seller/all-orders")
-	public String allOrders(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
-		model.addAttribute("orders", productService.getClosedOrdersForSeller(userDetails.getUserId()));
+	public String allOrders(@AuthenticationPrincipal CustomUserDetails userDetails, Model model,
+			@RequestParam(value = "search", required = false) String search) {
+		List<com.example.demo.model.OrderInfo> orders = productService.getClosedOrdersForSeller(userDetails.getUserId());
+		if (search != null && !search.isEmpty()) {
+			String s = search.trim();
+			orders = orders.stream()
+					.filter(o -> o.getOrderId() != null && o.getOrderId().toString().contains(s))
+					.toList();
+		}
+		model.addAttribute("orders", orders);
+		model.addAttribute("search", search);
 		return "seller_all_orders";
 	}
 

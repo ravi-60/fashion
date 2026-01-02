@@ -33,6 +33,17 @@ public class ProductService {
         return productRepository.findAll();
     }
 
+    public org.springframework.data.domain.Page<Product> findProductsBySellerId(Long sellerId, org.springframework.data.domain.Pageable pageable) {
+        return productRepository.findBySellerId(sellerId, pageable);
+    }
+
+    public org.springframework.data.domain.Page<Product> findProductsBySearch(String search, org.springframework.data.domain.Pageable pageable) {
+        if (search != null && !search.isEmpty()) {
+            return productRepository.findByProductNameContainingIgnoreCase(search, pageable);
+        }
+        return productRepository.findAll(pageable);
+    }
+
     public Optional<Product> getProductById(Long id) {
         return productRepository.findById(id);
     }
@@ -58,7 +69,14 @@ public class ProductService {
     }
 
     public List<Product> getProductsBySellerId(Long sellerId) {
-        return productRepository.findBySellerId(sellerId);
+        List<Product> products = productRepository.findBySellerId(sellerId);
+        // Ensure variants are initialized to avoid lazy-loading issues in templates
+        products.forEach(p -> {
+            if (p.getVariants() != null) {
+                p.getVariants().size();
+            }
+        });
+        return products;
     }
 
     public List<CartItem> getCartItemsForSeller(Long sellerId) {
@@ -77,11 +95,38 @@ public class ProductService {
 
     public List<OrderInfo> getPlacedOrdersForSeller(Long sellerId) {
         List<OrderInfo> orders = orderRepository.findBySellerIdAndStatus(sellerId, OrderInfo.OrderStatus.PLACED);
+        // initialize order items and their variants/products to avoid lazy-loading in templates
+        orders.forEach(o -> {
+            if (o.getOrderItems() != null) {
+                o.getOrderItems().forEach(oi -> {
+                    if (oi.getVariant() != null) {
+                        // touch variant fields
+                        oi.getVariant().getVariantId();
+                        if (oi.getVariant().getProduct() != null) {
+                            oi.getVariant().getProduct().getProductName();
+                        }
+                    }
+                });
+            }
+        });
         return orders;
     }
 
     public List<OrderInfo> getClosedOrdersForSeller(Long sellerId) {
         List<OrderInfo> orders = orderRepository.findBySellerIdAndStatusIn(sellerId, List.of(OrderInfo.OrderStatus.DELIVERED, OrderInfo.OrderStatus.CANCELLED));
+        // initialize order items and nested associations for template rendering
+        orders.forEach(o -> {
+            if (o.getOrderItems() != null) {
+                o.getOrderItems().forEach(oi -> {
+                    if (oi.getVariant() != null) {
+                        oi.getVariant().getVariantId();
+                        if (oi.getVariant().getProduct() != null) {
+                            oi.getVariant().getProduct().getProductName();
+                        }
+                    }
+                });
+            }
+        });
         System.out.println("[DEBUG] getClosedOrdersForSeller: sellerId=" + sellerId + ", orders.size=" + orders.size());
         return orders;
     }

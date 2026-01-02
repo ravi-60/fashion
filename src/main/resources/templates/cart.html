@@ -87,7 +87,14 @@
                         ₹<span th:text="${item.variant.product.price}">0</span>
                     </td>
 
-                    <td th:text="${item.quantity}">1</td>
+                    <td>
+                        <form th:action="@{/cart/update}" method="post" class="d-flex align-items-center gap-2">
+                            <input type="hidden" name="cartItemId" th:value="${item.cartItemId}" />
+                            <input type="number" name="quantity" min="0" th:max="${item.variant.stockQuantity}"
+                                   class="form-control form-control-sm" style="width:80px;" th:value="${item.quantity}" />
+                            <button type="submit" class="btn btn-sm btn-outline-primary">Update</button>
+                        </form>
+                    </td>
 
                     <td class="price">
                         ₹<span

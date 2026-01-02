@@ -23,9 +23,29 @@ public class AdminProductController {
 	private ProductService productService;
 
 	@GetMapping
-	public String listProducts(Model model) {
-		List<Product> products = productService.getAllProducts();
-		model.addAttribute("products", products);
+	public String listProducts(@RequestParam(name = "page", required = false, defaultValue = "0") int page,
+							   @RequestParam(name = "sort", required = false, defaultValue = "productId") String sort,
+							   @RequestParam(name = "dir", required = false, defaultValue = "asc") String dir,
+							   @RequestParam(name = "sellerId", required = false) Long sellerId,
+							   Model model) {
+		// Fixed page size = 5 as requested
+		int size = 5;
+		org.springframework.data.domain.Sort.Direction direction = "desc".equalsIgnoreCase(dir) ? org.springframework.data.domain.Sort.Direction.DESC : org.springframework.data.domain.Sort.Direction.ASC;
+		org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size, org.springframework.data.domain.Sort.by(direction, sort));
+		org.springframework.data.domain.Page<Product> productPage;
+		if (sellerId != null) {
+			productPage = productService.findProductsBySellerId(sellerId, pageable);
+		} else {
+			productPage = productService.findProductsBySearch(null, pageable);
+		}
+
+		model.addAttribute("productPage", productPage);
+		model.addAttribute("products", productPage.getContent());
+		model.addAttribute("currentPage", page);
+		model.addAttribute("pageSize", size);
+		model.addAttribute("sort", sort);
+		model.addAttribute("dir", dir);
+		model.addAttribute("sellerId", sellerId);
 		return "admin_products";
 	}
 

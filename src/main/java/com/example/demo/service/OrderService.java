@@ -24,6 +24,12 @@ public class OrderService {
     private PaymentRepository paymentRepository;
 
     @Autowired
+    private com.example.demo.repository.OrderItemRepository orderItemRepository;
+
+    @Autowired
+    private com.example.demo.repository.VariantRepository variantRepository;
+
+    @Autowired
     private CartService cartService;
 
     @Autowired
@@ -58,6 +64,26 @@ public class OrderService {
             order.setSellerId(sellerId);
             OrderInfo savedOrder = orderRepository.save(order);
 
+            // Save order items and adjust stock immediately (stock will be decreased when order placed)
+            java.util.List<OrderItem> orderItems = new java.util.ArrayList<>();
+            for (CartItem item : sellerItems) {
+                OrderItem oi = new OrderItem();
+                oi.setOrder(savedOrder);
+                oi.setVariant(item.getVariant());
+                oi.setQuantity(item.getQuantity());
+                oi.setUnitPrice(item.getVariant().getProduct().getPrice());
+                orderItemRepository.save(oi);
+                orderItems.add(oi);
+
+                // Decrease variant stock
+                Variant v = item.getVariant();
+                Integer current = v.getStockQuantity() == null ? 0 : v.getStockQuantity();
+                v.setStockQuantity(current - (item.getQuantity() == null ? 0 : item.getQuantity()));
+                variantRepository.save(v);
+            }
+            savedOrder.setOrderItems(orderItems);
+            orderRepository.save(savedOrder);
+
             // Mock Payment
             Payment payment = new Payment();
             payment.setOrder(savedOrder);
@@ -80,6 +106,15 @@ public class OrderService {
     public void cancelOrder(Long orderId) {
         orderRepository.findById(orderId).ifPresent(order -> {
             if (order.getStatus() != OrderInfo.OrderStatus.DELIVERED) {
+                // restore stock for each order item
+                if (order.getOrderItems() != null) {
+                    for (OrderItem oi : order.getOrderItems()) {
+                        Variant v = oi.getVariant();
+                        Integer current = v.getStockQuantity() == null ? 0 : v.getStockQuantity();
+                        v.setStockQuantity(current + (oi.getQuantity() == null ? 0 : oi.getQuantity()));
+                        variantRepository.save(v);
+                    }
+                }
                 order.setStatus(OrderInfo.OrderStatus.CANCELLED);
                 orderRepository.save(order);
             }
@@ -97,5 +132,13 @@ public class OrderService {
 
     public List<OrderInfo> getAllOrders() {
         return orderRepository.findAll();
+    }
+
+    public org.springframework.data.domain.Page<OrderInfo> findOrdersBySellerId(Long sellerId, org.springframework.data.domain.Pageable pageable) {
+        return orderRepository.findBySellerId(sellerId, pageable);
+    }
+
+    public org.springframework.data.domain.Page<OrderInfo> findOrders(org.springframework.data.domain.Pageable pageable) {
+        return orderRepository.findAll(pageable);
     }
 }

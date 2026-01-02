@@ -25,9 +25,19 @@ public class ProductController {
     private VariantService variantService;
 
     @GetMapping("/products")
-    public String listProducts(@RequestParam(required = false) String category, Model model) {
-        model.addAttribute("products", productService.filterByCategory(category));
+    public String listProducts(@RequestParam(required = false) String category,
+                               @RequestParam(required = false) String search,
+                               Model model) {
+        List<Product> products = productService.filterByCategory(category);
+        if (search != null && !search.isEmpty()) {
+            String s = search.toLowerCase().trim();
+            products = products.stream()
+                    .filter(p -> p.getProductName() != null && p.getProductName().toLowerCase().contains(s))
+                    .toList();
+        }
+        model.addAttribute("products", products);
         model.addAttribute("category", category);
+        model.addAttribute("search", search);
         return "products";
     }
 
