@@ -11,7 +11,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
-
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -26,20 +25,27 @@ public class SecurityConfig {
 						.requestMatchers("/admin/**").hasRole("ADMIN").requestMatchers("/seller/**").hasRole("SELLER")
 						.anyRequest().authenticated())
 
-				.csrf(csrf -> csrf.disable())
-				.formLogin(form -> form.loginPage("/login").successHandler((request, response, authentication) -> {
-					CustomUserDetails user = (CustomUserDetails) authentication
-							.getPrincipal();
-					String role = user.getRole().name();
-					String context = request.getContextPath();
-					if (role.equals("ADMIN")) {
-						response.sendRedirect(context + "/admin/dashboard");
-					} else if (role.equals("SELLER")) {
-						response.sendRedirect(context + "/seller/dashboard");
-					} else {
-						response.sendRedirect(context + "/products");
-					}
-				}).permitAll()).logout(logout -> logout.logoutSuccessUrl("/login?logout").permitAll());
+				.csrf(csrf -> csrf.requireCsrfProtectionMatcher(
+						request -> "POST".equals(request.getMethod()) && "/login".equals(request.getRequestURI())))
+
+				.formLogin(form -> form.loginPage("/login").loginProcessingUrl("/login")
+						.successHandler((request, response, authentication) -> {
+							CustomUserDetails user = (CustomUserDetails) authentication.getPrincipal();
+							String role = user.getRole().name();
+							String context = request.getContextPath();
+							if (role.equals("ADMIN")) {
+								response.sendRedirect(context + "/admin/dashboard");
+							} else if (role.equals("SELLER")) {
+								response.sendRedirect(context + "/seller/dashboard");
+							} else {
+								response.sendRedirect(context + "/products");
+							}
+						}).permitAll())
+				
+				.logout(logout -> logout.logoutUrl("/logout")
+						.logoutRequestMatcher(request -> "GET".equals(request.getMethod())
+								&& "/logout".equals(request.getRequestURI()))
+						.logoutSuccessUrl("/login?logout").permitAll());
 		return http.build();
 	}
 
