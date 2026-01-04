@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+<title>Seller Dashboard | Fashion Store</title>
+
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+	rel="stylesheet">
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
+	rel="stylesheet">
+
+<style>
+body {
+	background-color: #f1f5f9;
+	font-family: 'Segoe UI', sans-serif;
+}
+
+.dashboard-wrapper {
+	display: flex;
+	min-height: 100vh;
+}
+
+.sidebar {
+	width: 270px;
+	background: linear-gradient(180deg, #1e40af, #1e3a8a);
+	color: white;
+	padding: 25px 20px;
+	display: flex;
+	flex-direction: column;
+}
+
+.sidebar h4 {
+	font-weight: 700;
+	margin-bottom: 35px;
+	letter-spacing: 1px;
+}
+
+.sidebar a {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 12px 15px;
+	color: #e5e7eb;
+	text-decoration: none;
+	border-radius: 10px;
+	margin-bottom: 10px;
+	font-size: 0.95rem;
+}
+
+.sidebar a:hover, .sidebar a.active {
+	background-color: rgba(255, 255, 255, 0.18);
+	color: white;
+}
+
+.sidebar .logout {
+	margin-top: auto;
+	color: #fecaca;
+}
+
+.content {
+	flex-grow: 1;
+	padding: 30px 35px;
+}
+
+.page-header {
+	margin-bottom: 30px;
+}
+
+.page-header h3 {
+	font-weight: 700;
+}
+
+.breadcrumb {
+	font-size: 0.85rem;
+}
+
+.stat-card {
+	border-radius: 16px;
+	border: none;
+	box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+	padding: 20px;
+	height: 100%;
+}
+
+.stat-icon {
+	font-size: 1.8rem;
+	color: #2563eb;
+}
+
+.stat-title {
+	font-size: 0.85rem;
+	color: #64748b;
+	margin-top: 10px;
+}
+
+.stat-value {
+	font-size: 1.7rem;
+	font-weight: 700;
+	color: #1e40af;
+}
+
+.panel {
+	background: white;
+	border-radius: 16px;
+	padding: 22px;
+	box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+	height: 100%;
+}
+
+.panel h5 {
+	font-weight: 600;
+	margin-bottom: 15px;
+}
+
+.panel ul {
+	padding-left: 18px;
+	margin-bottom: 0;
+}
+
+.panel ul li {
+	font-size: 0.9rem;
+	color: #475569;
+	margin-bottom: 8px;
+}
+
+.info-text {
+	font-size: 0.9rem;
+	color: #475569;
+	line-height: 1.5;
+}
+</style>
+</head>
+
+<body>
+
+	<div class="dashboard-wrapper">
+
+		<!-- SIDEBAR -->
+		<div class="sidebar">
+			<h4>Fashion Store</h4>
+
+			<a href="#" class="active"> <i class="bi bi-speedometer2"></i>
+				Dashboard
+			</a> <a href="/seller/products"> <i class="bi bi-box-seam"></i> My
+				Products
+			</a> <a href="/seller/manage-orders"> <i class="bi bi-bag-check"></i>
+				Orders
+			</a> <a href="/seller/profile"> <i class="bi bi-person-circle"></i>
+				Profile
+			</a> <a href="/logout" class="logout"> <i
+				class="bi bi-box-arrow-right"></i> Logout
+			</a>
+		</div>
+
+		<!-- CONTENT -->
+		<div class="content">
+
+			<div class="page-header">
+				<nav class="breadcrumb mb-2">
+					<span class="breadcrumb-item">Seller</span> <span
+						class="breadcrumb-item active">Dashboard</span>
+				</nav>
+				<h3>
+					Welcome, <span th:text="${username}"></span>
+				</h3>
+				<p class="text-muted">Seller overview and platform guidance</p>
+			</div>
+
+			<!-- STATS -->
+			<div class="row g-4 mb-4">
+				<div class="col-md-3">
+					<div class="stat-card">
+						<div class="stat-icon">
+							<i class="bi bi-box"></i>
+						</div>
+						<div class="stat-title">Total Products</div>
+						<div class="stat-value" th:text="${totalProducts}">0</div>
+					</div>
+				</div>
+
+				<div class="col-md-3">
+					<div class="stat-card">
+						<div class="stat-icon">
+							<i class="bi bi-receipt"></i>
+						</div>
+						<div class="stat-title">Total Orders</div>
+						<div class="stat-value" th:text="${totalOrders}">0</div>
+					</div>
+				</div>
+
+				<div class="col-md-3">
+					<div class="stat-card">
+						<div class="stat-icon">
+							<i class="bi bi-currency-rupee"></i>
+						</div>
+						<div class="stat-title">Total Earnings</div>
+						<div class="stat-value" th:text="${totalEarnings}">₹0</div>
+					</div>
+				</div>
+
+				<div class="col-md-3">
+					<div class="stat-card">
+						<div class="stat-icon">
+							<i class="bi bi-graph-up-arrow"></i>
+						</div>
+						<div class="stat-title">Avg Order Value</div>
+						<div class="stat-value">
+							₹<span th:text="${averageOrderValue}">0</span>
+						</div>
+					</div>
+				</div>
+
+				<!-- INFO PANELS -->
+				<div class="row g-4 mb-4">
+
+					<div class="col-md-6">
+						<div class="panel">
+							<h5>Order Lifecycle Information</h5>
+							<ul>
+								<li>Orders move through Placed, Delivered, or Cancelled
+									states.</li>
+								<li>Total orders include only successfully placed orders.</li>
+								<li>Cancelled orders do not contribute to earnings.</li>
+								<li>Order management actions are available in the Orders
+									section.</li>
+							</ul>
+						</div>
+					</div>
+
+					<div class="col-md-6">
+						<div class="panel">
+							<h5>Product Performance Guidelines</h5>
+							<ul>
+								<li>Top product is calculated based on total quantity sold.</li>
+								<li>Products with low stock should be monitored regularly.</li>
+								<li>Inactive products may affect seller visibility.</li>
+								<li>Performance data helps sellers plan inventory updates.</li>
+							</ul>
+						</div>
+					</div>
+
+				</div>
+
+				<!-- BOTTOM INFO -->
+				<div class="row g-4">
+
+					<div class="col-md-4">
+						<div class="panel">
+							<h5>Inventory Monitoring</h5>
+							<p class="info-text">Inventory status helps sellers track
+								stock availability across variants. Keeping sufficient stock
+								improves order fulfillment and customer satisfaction.</p>
+						</div>
+					</div>
+
+					<div class="col-md-4">
+						<div class="panel">
+							<h5>Seller Account Information</h5>
+							<p class="info-text">This section summarizes seller-level
+								account details such as product ownership, order responsibility,
+								and sales contribution within the platform.</p>
+						</div>
+					</div>
+
+					<div class="col-md-4">
+						<div class="panel">
+							<h5>Quick Actions</h5>
+							<a href="/seller/products" class="btn btn-primary w-100 mb-2">
+								Manage Products </a> <a href="/seller/manage-orders"
+								class="btn btn-outline-primary w-100"> View Orders </a>
+						</div>
+					</div>
+
+				</div>
+
+			</div>
+		</div>
+</body>
+</html>

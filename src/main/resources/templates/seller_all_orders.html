@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Seller | All Orders</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        body {
+            background-color: #f1f5f9;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .dashboard-wrapper {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 270px;
+            background: linear-gradient(180deg, #1e40af, #1e3a8a);
+            color: white;
+            padding: 25px 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar h4 {
+            font-weight: 700;
+            margin-bottom: 35px;
+            letter-spacing: 1px;
+        }
+
+        .sidebar a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 15px;
+            color: #e5e7eb;
+            text-decoration: none;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+        }
+
+        .sidebar a:hover,
+        .sidebar a.active {
+            background-color: rgba(255,255,255,0.18);
+            color: white;
+        }
+
+        .sidebar .logout {
+            margin-top: auto;
+            color: #fecaca;
+        }
+
+        /* Content */
+        .content {
+            flex-grow: 1;
+            padding: 30px 35px;
+        }
+
+        .page-header h3 {
+            font-weight: 700;
+        }
+
+        .table thead {
+            background-color: #e2e8f0;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="dashboard-wrapper">
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <h4>Fashion Store</h4>
+
+        <a href="/seller/dashboard">
+            <i class="bi bi-speedometer2"></i> Dashboard
+        </a>
+
+        <a href="/seller/products">
+            <i class="bi bi-box-seam"></i> My Products
+        </a>
+
+        <a href="/seller/manage-orders">
+            <i class="bi bi-bag-check"></i> Orders
+        </a>
+
+
+        <a href="/seller/profile">
+            <i class="bi bi-person-circle"></i> Profile
+        </a>
+
+        <a href="/logout" class="logout">
+            <i class="bi bi-box-arrow-right"></i> Logout
+        </a>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content">
+
+        <!-- HEADER -->
+        <div class="page-header mb-4">
+            <h3>All Orders</h3>
+            <p class="text-muted">
+                Complete order history for products sold by you.
+            </p>
+        </div>
+
+        <!-- NAV BUTTONS -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <a href="/seller/manage-orders" class="btn btn-outline-primary w-100">
+                    Active Orders
+                </a>
+            </div>
+            <div class="col-md-3">
+                <a href="/seller/all-orders" class="btn btn-primary w-100">
+                    All Orders
+                </a>
+            </div>
+        </div>
+
+        <!-- SEARCH -->
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <form action="/seller/all-orders" method="get" class="d-flex">
+                    <input type="text" name="search" class="form-control me-2" placeholder="Search by Order ID" th:value="${search}" />
+                    <button type="submit" class="btn btn-outline-secondary">Search</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- EMPTY STATE -->
+        <div th:if="${orders.empty}" class="alert alert-info">
+            No orders found for your products.
+        </div>
+
+        <!-- TABLE -->
+        <div th:unless="${orders.empty}" class="table-responsive">
+            <table class="table table-bordered align-middle">
+                <thead>
+                <tr>
+                    <th>Order ID</th>
+                    <th>Customer</th>
+                    <th>Date</th>
+                    <th>Product Details</th>
+                    <th>Status</th>
+                    <th>Total Amount</th>
+                </tr>
+                </thead>
+
+                <tbody>
+                <tr th:each="order : ${orders}">
+                    <td th:text="${order.orderId}"></td>
+                    <td th:text="${order.customer.username}"></td>
+                    <td th:text="${order.orderDate}"></td>
+                    <td>
+                        <ul class="mb-0">
+                            <li th:each="it : ${order.orderItems}">
+                                <strong th:text="${it.variant.product.productName}"></strong>
+                                <span class="text-muted">(</span>
+                                <span th:text="'Variant: ' + ${it.variant.variantId}"></span>
+                                <span class="text-muted"> - </span>
+                                <span th:text="${it.variant.size}"></span>
+                                <span class="text-muted">/</span>
+                                <span th:text="${it.variant.color}"></span>
+                                <span class="text-muted">) x </span>
+                                <span th:text="${it.quantity}"></span>
+                            </li>
+                        </ul>
+                    </td>
+                    <td>
+                        <span th:text="${order.status}"
+                              th:class="'badge ' + 
+                              (${order.status} == 'DELIVERED' ? 'bg-success' :
+                              (${order.status} == 'CANCELLED' ? 'bg-danger' : 'bg-primary'))">
+                        </span>
+                    </td>
+                    <td th:text="${order.totalAmount}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

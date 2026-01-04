@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Admin | Manage Orders</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        body {
+            background-color: #f8fafc;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .dashboard-wrapper {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 270px;
+            background: linear-gradient(180deg, #991b1b, #7f1d1d);
+            color: white;
+            padding: 25px 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar h4 {
+            font-weight: 700;
+            margin-bottom: 35px;
+        }
+
+        .sidebar a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 15px;
+            color: #fecaca;
+            text-decoration: none;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+        }
+
+        .sidebar a:hover,
+        .sidebar a.active {
+            background-color: rgba(255,255,255,0.18);
+            color: white;
+        }
+
+        .sidebar .logout {
+            margin-top: auto;
+            color: #fca5a5;
+        }
+
+        /* Content */
+        .content {
+            flex-grow: 1;
+            padding: 30px 35px;
+        }
+
+        .card-box {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="dashboard-wrapper">
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <h4>Fashion Store</h4>
+
+        <a href="/admin/dashboard">
+            <i class="bi bi-speedometer2"></i> Dashboard
+        </a>
+
+        <a href="/admin/users">
+            <i class="bi bi-people"></i> Users
+        </a>
+
+        <a href="/admin/products">
+            <i class="bi bi-box-seam"></i> Products
+        </a>
+
+        <a href="/admin/orders" class="active">
+            <i class="bi bi-receipt"></i> Orders
+        </a>
+
+        <a href="/logout" class="logout">
+            <i class="bi bi-box-arrow-right"></i> Logout
+        </a>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content">
+
+        <h3 class="mb-4">All Orders</h3>
+
+        <div class="card-box">
+
+            <!-- SEARCH -->
+            <form method="get" action="/admin/orders" class="mb-3 search-box d-flex gap-2">
+                <input type="text" name="sellerId" th:value="${sellerId}" class="form-control" placeholder="Search by Seller ID" />
+                <button class="btn btn-primary">Search</button>
+            </form>
+
+            <table class="table table-bordered align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th><a th:href="@{/admin/orders(page=0,sort='orderId',dir=${sort=='orderId' && dir=='asc' ? 'desc' : 'asc'},sellerId=${sellerId})}">Order ID</a></th>
+                        <th><a th:href="@{/admin/orders(page=0,sort='customer.userId',dir=${sort=='customer.userId' && dir=='asc' ? 'desc' : 'asc'},sellerId=${sellerId})}">Customer</a></th>
+                        <th><a th:href="@{/admin/orders(page=0,sort='orderDate',dir=${sort=='orderDate' && dir=='asc' ? 'desc' : 'asc'},sellerId=${sellerId})}">Date</a></th>
+                        <th><a th:href="@{/admin/orders(page=0,sort='status',dir=${sort=='status' && dir=='asc' ? 'desc' : 'asc'},sellerId=${sellerId})}">Status</a></th>
+                        <th><a th:href="@{/admin/orders(page=0,sort='totalAmount',dir=${sort=='totalAmount' && dir=='asc' ? 'desc' : 'asc'},sellerId=${sellerId})}">Total</a></th>
+                        <th>Actions</th>
+                        <th><a th:href="@{/admin/orders(page=0,sort='sellerId',dir=${sort=='sellerId' && dir=='asc' ? 'desc' : 'asc'},sellerId=${sellerId})}">Seller</a></th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <tr th:each="order : ${orders}">
+                        <td th:text="${order.orderId}"></td>
+                        <td th:text="${order.customer.username}"></td>
+                        <td th:text="${order.orderDate}"></td>
+
+                        <td>
+                            <span th:text="${order.status}"
+                                  th:class="'badge ' + 
+                                  (${order.status.name() == 'DELIVERED'} ? 'bg-success' :
+                                  (${order.status.name() == 'CANCELLED'} ? 'bg-danger' : 'bg-primary'))">
+                            </span>
+                        </td>
+
+                        <td th:text="${order.totalAmount}"></td>
+
+                        <td>
+                            <form th:action="@{'/admin/orders/cancel/' + ${order.orderId}}"
+                                  method="post" style="display:inline;">
+                                <button class="btn btn-danger btn-sm"
+                                        th:disabled="${order.status.name() == 'CANCELLED' || order.status.name() == 'DELIVERED'}">
+                                    Cancel
+                                </button>
+                            </form>
+
+                            <form th:action="@{'/admin/orders/delivered/' + ${order.orderId}}"
+                                  method="post" style="display:inline;">
+                                <button class="btn btn-success btn-sm"
+                                        th:disabled="${order.status.name() == 'DELIVERED' || order.status.name() == 'CANCELLED'}">
+                                    Delivered
+                                </button>
+                            </form>
+                        </td>
+
+                        <td>
+                            <span class="text-muted" th:text="${order.sellerId}">N/A</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- PAGINATION -->
+            <div class="d-flex justify-content-between align-items-center mt-3">
+                <div>
+                    <span th:text="'Showing ' + ${orderPage.number * orderPage.size + 1} + ' - ' + ${orderPage.number * orderPage.size + orderPage.numberOfElements} + ' of ' + ${orderPage.totalElements}"></span>
+                </div>
+                <nav>
+                    <ul class="pagination mb-0">
+                        <li class="page-item" th:classappend="${orderPage.first} ? 'disabled'">
+                            <a class="page-link" th:href="@{/admin/orders(page=${orderPage.number-1},sort=${sort},dir=${dir},sellerId=${sellerId})}">Previous</a>
+                        </li>
+                        <li class="page-item" th:each="i : ${#numbers.sequence(0, orderPage.totalPages-1)}" th:classappend="${orderPage.number==i} ? 'active'">
+                            <a class="page-link" th:href="@{/admin/orders(page=${i},sort=${sort},dir=${dir},sellerId=${sellerId})}" th:text="${i+1}"></a>
+                        </li>
+                        <li class="page-item" th:classappend="${orderPage.last} ? 'disabled'">
+                            <a class="page-link" th:href="@{/admin/orders(page=${orderPage.number+1},sort=${sort},dir=${dir},sellerId=${sellerId})}">Next</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
