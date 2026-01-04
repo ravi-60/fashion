@@ -70,6 +70,30 @@
         .table thead {
             background-color: #e2e8f0;
         }
+
+        /* 🔹 Improved Product Details UI */
+        .order-items {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .order-item {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 6px 10px;
+            font-size: 0.85rem;
+        }
+
+        .order-item .name {
+            font-weight: 600;
+        }
+
+        .order-item .meta {
+            color: #64748b;
+            font-size: 0.8rem;
+        }
     </style>
 </head>
 
@@ -92,7 +116,6 @@
         <a href="/seller/manage-orders">
             <i class="bi bi-bag-check"></i> Orders
         </a>
-
 
         <a href="/seller/profile">
             <i class="bi bi-person-circle"></i> Profile
@@ -132,8 +155,13 @@
         <div class="row mb-3">
             <div class="col-md-6">
                 <form action="/seller/all-orders" method="get" class="d-flex">
-                    <input type="text" name="search" class="form-control me-2" placeholder="Search by Order ID" th:value="${search}" />
-                    <button type="submit" class="btn btn-outline-secondary">Search</button>
+                    <input type="text" name="search"
+                           class="form-control me-2"
+                           placeholder="Search by Order ID"
+                           th:value="${search}" />
+                    <button type="submit" class="btn btn-outline-secondary">
+                        Search
+                    </button>
                 </form>
             </div>
         </div>
@@ -162,28 +190,35 @@
                     <td th:text="${order.orderId}"></td>
                     <td th:text="${order.customer.username}"></td>
                     <td th:text="${order.orderDate}"></td>
+
+                    <!-- ✅ IMPROVED PRODUCT DETAILS COLUMN -->
                     <td>
-                        <ul class="mb-0">
-                            <li th:each="it : ${order.orderItems}">
-                                <strong th:text="${it.variant.product.productName}"></strong>
-                                <span class="text-muted">(</span>
-                                <span th:text="'Variant: ' + ${it.variant.variantId}"></span>
-                                <span class="text-muted"> - </span>
-                                <span th:text="${it.variant.size}"></span>
-                                <span class="text-muted">/</span>
-                                <span th:text="${it.variant.color}"></span>
-                                <span class="text-muted">) x </span>
-                                <span th:text="${it.quantity}"></span>
-                            </li>
-                        </ul>
+                        <div class="order-items">
+                            <div class="order-item" th:each="it : ${order.orderItems}">
+                                <div class="name"
+                                     th:text="${it.variant.product.productName}">
+                                </div>
+
+                                <div class="meta">
+                                    Size:
+                                    <span th:text="${it.variant.size}"></span>
+                                    /
+                                    <span th:text="${it.variant.color}"></span>
+                                    • Qty:
+                                    <span th:text="${it.quantity}"></span>
+                                </div>
+                            </div>
+                        </div>
                     </td>
+
                     <td>
                         <span th:text="${order.status}"
-                              th:class="'badge ' + 
+                              th:class="'badge ' +
                               (${order.status} == 'DELIVERED' ? 'bg-success' :
                               (${order.status} == 'CANCELLED' ? 'bg-danger' : 'bg-primary'))">
                         </span>
                     </td>
+
                     <td th:text="${order.totalAmount}"></td>
                 </tr>
                 </tbody>

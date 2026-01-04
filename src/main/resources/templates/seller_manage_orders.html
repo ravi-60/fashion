@@ -70,6 +70,35 @@
         .table thead {
             background-color: #e2e8f0;
         }
+
+        /* 🔹 Improved Items UI */
+        .order-items {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .order-item {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 6px 10px;
+            font-size: 0.85rem;
+        }
+
+        .order-item .name {
+            font-weight: 600;
+        }
+
+        .order-item .meta {
+            color: #64748b;
+            font-size: 0.8rem;
+        }
+
+        .order-item .price {
+            font-weight: 600;
+            color: #0f172a;
+        }
     </style>
 </head>
 
@@ -113,7 +142,7 @@
             </p>
         </div>
 
-    <!-- ACTION BUTTONS -->
+        <!-- ACTION BUTTONS -->
         <div class="row mb-4">
             <div class="col-md-3">
                 <a href="/seller/manage-orders" class="btn btn-primary w-100">
@@ -131,8 +160,12 @@
         <div class="row mb-3">
             <div class="col-md-6">
                 <form action="/seller/manage-orders" method="get" class="d-flex">
-                    <input type="text" name="search" class="form-control me-2" placeholder="Search by Order ID" th:value="${search}" />
-                    <button type="submit" class="btn btn-outline-secondary">Search</button>
+                    <input type="text" name="search" class="form-control me-2"
+                           placeholder="Search by Order ID"
+                           th:value="${search}" />
+                    <button type="submit" class="btn btn-outline-secondary">
+                        Search
+                    </button>
                 </form>
             </div>
         </div>
@@ -158,35 +191,45 @@
                 </thead>
 
                 <tbody>
-                <tr th:each="order : ${orders}" th:attr="data-order-id=${order.orderId}">
+                <tr th:each="order : ${orders}">
                     <td th:text="${order.orderId}"></td>
                     <td th:text="${order.customer.username}"></td>
                     <td th:text="${order.orderDate}"></td>
+
+                    <!-- ✅ IMPROVED ITEMS COLUMN -->
                     <td>
-                        <ul class="mb-0">
-                            <li th:each="it : ${order.orderItems}">
-                                <strong th:text="${it.variant.product.productName}"></strong>
-                                <span class="text-muted">(</span>
-                                <span th:text="'Variant: ' + ${it.variant.variantId}"></span>
-                                <span class="text-muted"> - </span>
-                                <span th:text="${it.variant.size}"></span>
-                                <span class="text-muted">/</span>
-                                <span th:text="${it.variant.color}"></span>
-                                <span class="text-muted">) x </span>
-                                <span th:text="${it.quantity}"></span>
-                                <span class="text-muted"> @ ₹</span>
-                                <span th:text="${it.unitPrice}"></span>
-                            </li>
-                        </ul>
+                        <div class="order-items">
+                            <div class="order-item" th:each="it : ${order.orderItems}">
+                                <div class="name"
+                                     th:text="${it.variant.product.productName}">
+                                </div>
+
+                                <div class="meta">
+                                    Size:
+                                    <span th:text="${it.variant.size}"></span>
+                                    /
+                                    <span th:text="${it.variant.color}"></span>
+                                    • Qty:
+                                    <span th:text="${it.quantity}"></span>
+                                </div>
+
+                                <div class="price">
+                                    ₹<span th:text="${it.unitPrice}"></span>
+                                </div>
+                            </div>
+                        </div>
                     </td>
+
                     <td>
                         <span th:text="${order.status}"
-                              th:class="'badge ' + 
+                              th:class="'badge ' +
                               (${order.status} == 'DELIVERED' ? 'bg-success' :
                               (${order.status} == 'CANCELLED' ? 'bg-danger' : 'bg-primary'))">
                         </span>
                     </td>
+
                     <td th:text="${order.totalAmount}"></td>
+
                     <td>
                         <button class="btn btn-danger btn-sm cancel-btn"
                                 th:data-id="${order.orderId}">
@@ -220,7 +263,7 @@
         btn.addEventListener('click', function (e) {
             e.preventDefault();
             const orderId = btn.getAttribute('data-id');
-            fetch('/seller/orders/cancel/' + orderId, {method: 'POST'})
+            fetch('/seller/orders/cancel/' + orderId, { method: 'POST' })
                 .then(resp => {
                     if (resp.ok) {
                         fadeOutRow(btn.closest('tr'));
@@ -233,7 +276,7 @@
         btn.addEventListener('click', function (e) {
             e.preventDefault();
             const orderId = btn.getAttribute('data-id');
-            fetch('/seller/orders/delivered/' + orderId, {method: 'POST'})
+            fetch('/seller/orders/delivered/' + orderId, { method: 'POST' })
                 .then(resp => {
                     if (resp.ok) {
                         fadeOutRow(btn.closest('tr'));
