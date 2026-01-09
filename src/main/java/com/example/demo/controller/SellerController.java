@@ -1,29 +1,32 @@
 package com.example.demo.controller;
 
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.PathVariable;
-import java.util.ArrayList;
-import com.example.demo.model.Variant;
-import com.example.demo.config.CustomUserDetails;
-import com.example.demo.service.ProductService;
-import com.example.demo.service.OrderService;
-import org.springframework.beans.factory.annotation.Autowired;
-import java.util.List;
-import com.example.demo.model.Product;
-import java.util.Map;
-import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.example.demo.config.CustomUserDetails;
+import com.example.demo.model.OrderInfo;
+import com.example.demo.model.Product;
+import com.example.demo.model.Variant;
+import com.example.demo.service.OrderService;
+import com.example.demo.service.ProductService;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Controller
 public class SellerController {
@@ -33,19 +36,16 @@ public class SellerController {
 
 	@Autowired
 	private OrderService orderService;
-	
+
 	@GetMapping("/seller/profile")
-	public String sellerProfile(
-	        @AuthenticationPrincipal CustomUserDetails userDetails,
-	        Model model) {
+	public String sellerProfile(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
 
-	    model.addAttribute("username", userDetails.getUsername());
-	    model.addAttribute("email", userDetails.getEmail());
-	    model.addAttribute("role", userDetails.getRole().name());
+		model.addAttribute("username", userDetails.getUsername());
+		model.addAttribute("email", userDetails.getEmail());
+		model.addAttribute("role", userDetails.getRole().name());
 
-	    return "seller_profile";
+		return "seller_profile";
 	}
-
 
 	@GetMapping("/seller/dashboard")
 	public String sellerDashboard(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
@@ -56,18 +56,13 @@ public class SellerController {
 		// product count
 		long totalProducts = productService.getTotalProductsForSeller(sellerId);
 		model.addAttribute("totalProducts", totalProducts);
-		
+
 		long totalOrdersForSeller = productService.getTotalOrdersForSeller(sellerId);
 		model.addAttribute("totalOrders", totalOrdersForSeller);
 
-		model.addAttribute("totalEarnings",
-		        productService.getTotalEarningsForSeller(sellerId));
+		model.addAttribute("totalEarnings", productService.getTotalEarningsForSeller(sellerId));
 
-		model.addAttribute(
-		    "averageOrderValue",
-		    productService.getAverageOrderValueForSeller(sellerId)
-		);
-
+		model.addAttribute("averageOrderValue", productService.getAverageOrderValueForSeller(sellerId));
 
 		return "seller_dashboard";
 	}
@@ -94,11 +89,11 @@ public class SellerController {
 	@GetMapping("/seller/manage-orders")
 	public String manageOrders(@AuthenticationPrincipal CustomUserDetails userDetails, Model model,
 			@RequestParam(value = "search", required = false) String search) {
-		List<com.example.demo.model.OrderInfo> orders = productService.getPlacedOrdersForSeller(userDetails.getUserId());
+		List<com.example.demo.model.OrderInfo> orders = productService
+				.getPlacedOrdersForSeller(userDetails.getUserId());
 		if (search != null && !search.isEmpty()) {
 			String s = search.trim();
-			orders = orders.stream()
-					.filter(o -> o.getOrderId() != null && o.getOrderId().toString().contains(s))
+			orders = orders.stream().filter(o -> o.getOrderId() != null && o.getOrderId().toString().contains(s))
 					.toList();
 		}
 		model.addAttribute("orders", orders);
@@ -106,19 +101,35 @@ public class SellerController {
 		return "seller_manage_orders";
 	}
 
+	
 	@GetMapping("/seller/all-orders")
-	public String allOrders(@AuthenticationPrincipal CustomUserDetails userDetails, Model model,
-			@RequestParam(value = "search", required = false) String search) {
-		List<com.example.demo.model.OrderInfo> orders = productService.getClosedOrdersForSeller(userDetails.getUserId());
-		if (search != null && !search.isEmpty()) {
-			String s = search.trim();
-			orders = orders.stream()
-					.filter(o -> o.getOrderId() != null && o.getOrderId().toString().contains(s))
-					.toList();
-		}
-		model.addAttribute("orders", orders);
-		model.addAttribute("search", search);
-		return "seller_all_orders";
+	public String allOrders(
+	        @AuthenticationPrincipal CustomUserDetails userDetails, 
+	        Model model,
+	        @RequestParam(name = "page", defaultValue = "0") int page,
+	        @RequestParam(name = "sort", defaultValue = "orderId") String sort,
+	        @RequestParam(name = "dir", defaultValue = "desc") String dir,
+	        @RequestParam(name = "search", required = false) String search) {
+
+	    int size = 5; // Same page size as your Admin User page
+	    org.springframework.data.domain.Sort.Direction direction = 
+	        "desc".equalsIgnoreCase(dir) ? org.springframework.data.domain.Sort.Direction.DESC 
+	                                   : org.springframework.data.domain.Sort.Direction.ASC;
+	    
+	    org.springframework.data.domain.Pageable pageable = 
+	        org.springframework.data.domain.PageRequest.of(page, size, org.springframework.data.domain.Sort.by(direction, sort));
+
+	    org.springframework.data.domain.Page<OrderInfo> orderPage = 
+	        productService.getClosedOrdersForSellerPaged(userDetails.getUserId(), search, pageable);
+
+	    model.addAttribute("orderPage", orderPage);
+	    model.addAttribute("orders", orderPage.getContent());
+	    model.addAttribute("currentPage", page);
+	    model.addAttribute("sort", sort);
+	    model.addAttribute("dir", dir);
+	    model.addAttribute("search", search);
+
+	    return "seller_all_orders";
 	}
 
 	@GetMapping("/seller/products/add")
@@ -127,39 +138,42 @@ public class SellerController {
 		model.addAttribute("formAction", "/seller/products/add");
 		return "seller_product_form";
 	}
-
+	
 	@PostMapping("/seller/products/add")
-	public String addProduct(@ModelAttribute Product product, @RequestParam Map<String, String> params,
-			@RequestParam(name = "image", required = false) MultipartFile image,
-			@AuthenticationPrincipal com.example.demo.config.CustomUserDetails userDetails) {
-		product.setSellerId(userDetails.getUserId());
-		// Parse variants from params
-		ArrayList<Variant> variants = new ArrayList<>();
-		int i = 0;
-		while (params.containsKey("variants[" + i + "].color")) {
-			Variant variant = new Variant();
-			variant.setColor(params.get("variants[" + i + "].color"));
-			variant.setSize(Variant.Size.valueOf(params.get("variants[" + i + "].size")));
-			variant.setStockQuantity(Integer.parseInt(params.get("variants[" + i + "].stockQuantity")));
-			variants.add(variant);
-			i++;
-		}
-		product.setVariants(variants);
+	public String addProduct(@ModelAttribute Product product, 
+	                        @RequestParam("variantsJson") String variantsJson, // Get the JSON string
+	                        @RequestParam(name = "image", required = false) MultipartFile image,
+	                        @AuthenticationPrincipal CustomUserDetails userDetails) {
+	    
+	    product.setSellerId(userDetails.getUserId());
 
-		// Save image if provided
-		if (image != null && !image.isEmpty()) {
-			try {
-				String savedPath = saveProductImage(product.getProductName(), image);
-				product.setImgPath(savedPath);
-			} catch (IOException e) {
-				// Log error - for now print stacktrace
-				e.printStackTrace();
-			}
-		}
+	    try {
+	        // Parse the JSON string into the List of Variants
+	        ObjectMapper mapper = new ObjectMapper();
+	        List<Variant> variantList = mapper.readValue(variantsJson, new TypeReference<List<Variant>>(){});
+	        
+	        // Link variants to product
+	        if (variantList != null) {
+	            for (Variant variant : variantList) {
+	                variant.setProduct(product);
+	            }
+	            product.setVariants(variantList);
+	        }
+	    } catch (Exception e) {
+	        e.printStackTrace(); // Handle parsing error
+	    }
 
-		productService.saveProduct(product);
-		return "redirect:/seller/products";
+	    // Image logic...
+	    if (image != null && !image.isEmpty()) {
+	        try {
+	            product.setImgPath(saveProductImage(product.getProductName(), image));
+	        } catch (IOException e) { e.printStackTrace(); }
+	    }
+
+	    productService.saveProduct(product);
+	    return "redirect:/seller/products";
 	}
+
 
 	@PostMapping("/seller/orders/delivered/{id}")
 	public String markOrderAsDelivered(@PathVariable Long id,
@@ -187,33 +201,83 @@ public class SellerController {
 		return "seller_product_form";
 	}
 
+	
 	@PostMapping("/seller/products/edit/{id}")
-	public String editProduct(@PathVariable Long id, @ModelAttribute Product product,
-			@RequestParam(name = "image", required = false) MultipartFile image,
-			@AuthenticationPrincipal CustomUserDetails userDetails) {
-		product.setProductId(id);
-		product.setSellerId(userDetails.getUserId());
+	public String editProduct(@PathVariable Long id, 
+	                          @ModelAttribute Product product,
+	                          @RequestParam("variantsJson") String variantsJson, 
+	                          @RequestParam(name = "image", required = false) MultipartFile image,
+	                          @AuthenticationPrincipal CustomUserDetails userDetails) {
+	    
+	    // 1. Load the existing product
+	    Product existingProduct = productService.getProductById(id)
+	            .filter(p -> p.getSellerId().equals(userDetails.getUserId()))
+	            .orElseThrow(() -> new RuntimeException("Product not found"));
 
-		// Save image if provided
-		if (image != null && !image.isEmpty()) {
-			try {
-				String savedPath = saveProductImage(product.getProductName(), image);
-				product.setImgPath(savedPath);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
+	    // 2. Update basic info
+	    existingProduct.setProductName(product.getProductName());
+	    existingProduct.setDescription(product.getDescription());
+	    existingProduct.setCategory(product.getCategory());
+	    existingProduct.setPrice(product.getPrice());
+	    existingProduct.setStatus(product.getStatus());
 
-		productService.saveProduct(product);
-		return "redirect:/seller/products";
+	    // 3. SMART VARIANT UPDATE LOGIC
+	    try {
+	        ObjectMapper mapper = new ObjectMapper();
+	        List<Variant> incomingVariants = mapper.readValue(variantsJson, new TypeReference<List<Variant>>(){});
+	        
+	        if (incomingVariants != null) {
+	            List<Variant> currentVariants = existingProduct.getVariants();
+
+	            for (Variant incoming : incomingVariants) {
+	                // Try to find an existing variant by ID...
+	                // OR by matching Size and Color (to prevent duplicates if ID is missing)
+	                Variant match = currentVariants.stream()
+	                    .filter(v -> (incoming.getVariantId() != null && v.getVariantId().equals(incoming.getVariantId())) 
+	                              || (v.getSize() == incoming.getSize() && v.getColor().equalsIgnoreCase(incoming.getColor())))
+	                    .findFirst()
+	                    .orElse(null);
+
+	                if (match != null) {
+	                    // UPDATE existing
+	                    match.setStockQuantity(incoming.getStockQuantity());
+	                    match.setSize(incoming.getSize());
+	                    match.setColor(incoming.getColor());
+	                    match.setActive(true);
+	                } else {
+	                    // ADD NEW only if no match found
+	                    incoming.setProduct(existingProduct);
+	                    incoming.setActive(true);
+	                    currentVariants.add(incoming);
+	                }
+	            }
+	        }
+	    } catch (Exception e) { e.printStackTrace(); }
+
+	    // 4. Image logic
+	    if (image != null && !image.isEmpty()) {
+	        try {
+	            existingProduct.setImgPath(saveProductImage(product.getProductName(), image));
+	        } catch (IOException e) { e.printStackTrace(); }
+	    }
+
+	    productService.saveProduct(existingProduct);
+	    return "redirect:/seller/products?updated";
 	}
 
+	
 	@PostMapping("/seller/products/delete/{id}")
 	public String deleteProduct(@PathVariable Long id, @AuthenticationPrincipal CustomUserDetails userDetails) {
-		Product product = productService.getProductById(id).filter(p -> p.getSellerId().equals(userDetails.getUserId()))
-				.orElseThrow();
-		productService.deleteProduct(id);
-		return "redirect:/seller/products";
+	    Product product = productService.getProductById(id)
+	            .filter(p -> p.getSellerId().equals(userDetails.getUserId()))
+	            .orElseThrow();
+	            
+	    // Professional Soft Delete:
+	    product.setStatus(Product.Status.OUT_OF_STOCK);
+	    product.getVariants().forEach(v -> v.setStockQuantity(0));
+	    
+	    productService.saveProduct(product);
+	    return "redirect:/seller/products?deleted";
 	}
 
 	private String saveProductImage(String productName, MultipartFile image) throws IOException {
@@ -228,4 +292,5 @@ public class SellerController {
 		Files.copy(image.getInputStream(), target, StandardCopyOption.REPLACE_EXISTING);
 		return "/images/products/" + safeName + "/" + filename;
 	}
+	
 }

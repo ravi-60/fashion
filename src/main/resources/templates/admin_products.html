@@ -1,196 +1,224 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-
 <head>
     <title>Admin | Manage Products</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
     <style>
         body {
-            background-color: #f8fafc;
-            font-family: 'Segoe UI', sans-serif;
+            background-color: #f8f9fb;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            overflow-x: hidden;
         }
 
         .dashboard-wrapper {
             display: flex;
-            min-height: 100vh;
+            width: 100%;
         }
 
-        /* Sidebar */
+        /* ================= FIXED SIDEBAR ================= */
         .sidebar {
-            width: 270px;
-            background: linear-gradient(180deg, #991b1b, #7f1d1d);
+            width: 260px;
+            background: linear-gradient(180deg, #1a1a2e, #222255) !important;
             color: white;
-            padding: 25px 20px;
+            padding: 26px 22px;
             display: flex;
             flex-direction: column;
+            height: 100vh;
+            position: fixed; /* Keep it fixed on the left */
+            top: 0;
+            left: 0;
+            z-index: 1000;
         }
 
-        .sidebar h4 {
-            font-weight: 700;
-            margin-bottom: 35px;
-        }
+        .sidebar h4 { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.6rem; margin-bottom: 38px; }
+        .sidebar h4 span { color: #e94560; }
+        .sidebar a { display: flex; align-items: center; gap: 12px; padding: 12px 15px; color: #e5e7eb; text-decoration: none; border-radius: 10px; margin-bottom: 10px; font-size: 0.95rem; transition: 0.25s; }
+        .sidebar a:hover, .sidebar a.active { background-color: rgba(233, 69, 96, 0.22) !important; color: white; }
+        .sidebar .logout { margin-top: auto; color: #fecaca; }
 
-        .sidebar a {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 15px;
-            color: #fecaca;
-            text-decoration: none;
-            border-radius: 10px;
-            margin-bottom: 10px;
-            font-size: 0.95rem;
-        }
-
-        .sidebar a:hover,
-        .sidebar a.active {
-            background-color: rgba(255,255,255,0.18);
-            color: white;
-        }
-
-        .sidebar .logout {
-            margin-top: auto;
-            color: #fca5a5;
-        }
-
-        /* Content */
-        .content {
+        /* ================= MAIN AREA ================= */
+        .main-area {
             flex-grow: 1;
-            padding: 30px 35px;
+            margin-left: 260px; /* Offset the width of the fixed sidebar */
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background-color: #f8f9fb;
         }
 
-        .page-header h3 {
-            font-weight: 700;
-        }
+        .content { flex-grow: 1; padding: 34px 40px; }
+        .page-header h3 { font-family: 'Playfair Display', serif; font-weight: 700; }
 
-        .table thead {
-            background-color: #fee2e2;
-        }
+        /* Search Section */
+        .search-container-wide { display: flex; gap: 0px; max-width: 550px; align-items: center; }
+        .search-input-wide { height: 42px; font-size: 0.9rem; border-radius: 8px 0 0 8px; border: 1px solid #ced4da; padding: 5px 15px; flex-grow: 1; border-right: none; }
+        .search-input-wide:focus { border-color: #e94560; outline: none; box-shadow: none; }
 
-        .search-box {
-            max-width: 350px;
-        }
+        .btn-crimson { height: 42px; background-color: #e94560; color: white; border: none; padding: 0 25px; border-radius: 0 8px 8px 0; font-size: 0.9rem; font-weight: 500; transition: 0.2s ease; display: flex; align-items: center; }
+        .btn-crimson:hover { background-color: #c62d48; color: white; }
+
+        .back-arrow { font-size: 1.5rem; color: #6c757d; text-decoration: none; display: flex; align-items: center; transition: 0.2s; margin-right: 15px; }
+        .back-arrow:hover { color: #e94560; }
+
+        /* TABLE CARD STYLE */
+        .table-card { background: white; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); padding: 20px; margin-bottom: 40px; }
+        .table { table-layout: fixed; width: 100%; border: none; }
+        .table thead th { background-color: #f1f5f9; color: #475569; font-weight: 600; text-transform: uppercase; font-size: 0.8rem; border: none; padding: 12px; }
+        .table thead th a { text-decoration: none; color: inherit; display: flex; align-items: center; gap: 5px; justify-content: center; }
+        .table td { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 14px 12px; border-bottom: 1px solid #f1f5f9; }
+
+        /* Column Widths */
+        .col-id { width: 8%; }
+        .col-name { width: 22%; }
+        .col-cat { width: 15%; }
+        .col-price { width: 12%; }
+        .col-status { width: 15%; }
+        .col-seller { width: 13%; }
+        .col-actions { width: 15%; }
+
+        /* FOOTER */
+        .footer { background: #0f172a !important; color: #e5e7eb; text-align: center; padding: 1.2rem 0; font-size: 0.9rem; margin-top: auto; }
+        .badge { font-weight: 600; padding: 0.5em 0.8em; text-transform: uppercase; border-radius: 6px; }
+
+        /* PAGINATION */
+        .pagination .page-link { color: #1a1a2e; border: none; margin: 0 3px; border-radius: 5px; }
+        .pagination .active .page-link { background-color: #e94560; color: white; border: none; }
     </style>
 </head>
 
 <body>
 
 <div class="dashboard-wrapper">
-
-    <!-- SIDEBAR -->
     <div class="sidebar">
-        <h4>Fashion Store</h4>
-
-        <a href="/admin/dashboard">
-            <i class="bi bi-speedometer2"></i> Dashboard
-        </a>
-
-        <a href="/admin/users">
-            <i class="bi bi-people"></i> Users
-        </a>
-
-        <a href="/admin/products" class="active">
-            <i class="bi bi-box-seam"></i> Products
-        </a>
-
-        <a href="/admin/orders">
-            <i class="bi bi-receipt"></i> Orders
-        </a>
-
-        <a href="/logout" class="logout">
-            <i class="bi bi-box-arrow-right"></i> Logout
-        </a>
+        <h4>Genc<span>Fashion</span></h4>
+        <a href="/admin/dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a>
+        <a href="/admin/users"><i class="bi bi-people"></i> Users</a>
+        <a href="/admin/products" class="active"><i class="bi bi-box-seam"></i> Products</a>
+        <a href="/admin/orders"><i class="bi bi-receipt"></i> Orders</a>
+        <a href="/logout" class="logout"><i class="bi bi-box-arrow-right"></i> Logout</a>
     </div>
 
-    <!-- CONTENT -->
-    <div class="content">
-
-        <!-- HEADER -->
-        <div class="page-header mb-4">
-            <h3>Manage Products</h3>
-            <p class="text-muted">
-                View and manage all products listed by sellers.
-            </p>
-        </div>
-
-        <!-- SEARCH -->
-        <form method="get" action="/admin/products" class="mb-4 search-box d-flex gap-2">
-            <input type="text"
-                   name="sellerId"
-                   th:value="${sellerId}"
-                   class="form-control"
-                   placeholder="Search by Seller ID">
-            <button class="btn btn-primary">Search</button>
-        </form>
-
-        <!-- TABLE -->
-        <div class="table-responsive">
-            <table class="table table-bordered align-middle">
-                <thead>
-                <tr>
-                    <th><a th:href="@{/admin/products(page=0,sort='productId',dir=${sort=='productId' && dir=='asc' ? 'desc' : 'asc'},sellerId=${sellerId})}">ID</a></th>
-                    <th><a th:href="@{/admin/products(page=0,sort='productName',dir=${sort=='productName' && dir=='asc' ? 'desc' : 'asc'},sellerId=${sellerId})}">Name</a></th>
-                    <th><a th:href="@{/admin/products(page=0,sort='category',dir=${sort=='category' && dir=='asc' ? 'desc' : 'asc'},sellerId=${sellerId})}">Category</a></th>
-                    <th><a th:href="@{/admin/products(page=0,sort='price',dir=${sort=='price' && dir=='asc' ? 'desc' : 'asc'},sellerId=${sellerId})}">Price</a></th>
-                    <th>Status</th>
-                    <th><a th:href="@{/admin/products(page=0,sort='sellerId',dir=${sort=='sellerId' && dir=='asc' ? 'desc' : 'asc'},sellerId=${sellerId})}">Seller</a></th>
-                    <th style="width:160px;">Actions</th>
-                </tr>
-                </thead>
-
-                <tbody>
-                <tr th:each="product : ${products}">
-                    <td th:text="${product.productId}"></td>
-                    <td th:text="${product.productName}"></td>
-                    <td th:text="${product.category}"></td>
-                    <td th:text="${product.price}"></td>
-                    <td>
-                        <span class="badge bg-secondary" th:text="${product.status}"></span>
-                    </td>
-                    <td th:text="${product.sellerId}"></td>
-                    <td>
-                        <a th:href="@{'/admin/products/edit/' + ${product.productId}}"
-                           class="btn btn-sm btn-primary">
-                            Edit
-                        </a>
-
-                        <form th:action="@{'/admin/products/delete/' + ${product.productId}}"
-                              method="post"
-                              style="display:inline;">
-                            <button type="submit" class="btn btn-sm btn-danger">
-                                Delete
-                            </button>
-                        </form>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <!-- PAGINATION -->
-        <div class="d-flex justify-content-between align-items-center mt-3">
-            <div>
-                <span th:text="'Showing ' + ${productPage.number * productPage.size + 1} + ' - ' + ${productPage.number * productPage.size + productPage.numberOfElements} + ' of ' + ${productPage.totalElements}"></span>
+    <div class="main-area">
+        <div class="content">
+            <div class="page-header mb-4">
+                <h3>Manage Products</h3>
+                <p class="text-muted">Review and manage inventory across all sellers.</p>
             </div>
-            <nav>
-                <ul class="pagination mb-0">
-                    <li class="page-item" th:classappend="${productPage.first} ? 'disabled'">
-                        <a class="page-link" th:href="@{/admin/products(page=${productPage.number-1},sort=${sort},dir=${dir},sellerId=${sellerId})}">Previous</a>
-                    </li>
-                    <li class="page-item" th:each="i : ${#numbers.sequence(0, productPage.totalPages-1)}" th:classappend="${productPage.number==i} ? 'active'">
-                        <a class="page-link" th:href="@{/admin/products(page=${i},sort=${sort},dir=${dir},sellerId=${sellerId})}" th:text="${i+1}"></a>
-                    </li>
-                    <li class="page-item" th:classappend="${productPage.last} ? 'disabled'">
-                        <a class="page-link" th:href="@{/admin/products(page=${productPage.number+1},sort=${sort},dir=${dir},sellerId=${sellerId})}">Next</a>
-                    </li>
-                </ul>
-            </nav>
+
+            <div class="mb-4">
+                <form method="get" action="/admin/products">
+                    <div class="search-container-wide">
+                        <a th:if="${sellerId != null and sellerId != ''}" href="/admin/products" class="back-arrow" title="Back to All Products">
+                            <i class="bi bi-arrow-left"></i>
+                        </a>
+                        <input type="number" name="sellerId" th:value="${sellerId}" class="form-control search-input-wide" placeholder="Search by Seller ID ...">
+                        <button type="submit" class="btn btn-crimson">Search</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="table-card">
+                <div class="table-responsive">
+                    <table class="table align-middle text-center">
+                        <thead>
+                            <tr>
+                                <th class="col-id">
+                                    <a th:href="@{/admin/products(page=0,sort='productId',dir=${sort=='productId' && dir=='asc' ? 'desc' : 'asc'},sellerId=${sellerId})}">
+                                        ID <i class="bi bi-arrow-down-up ms-1 small"></i>
+                                    </a>
+                                </th>
+                                <th class="col-name">
+                                    <a th:href="@{/admin/products(page=0,sort='productName',dir=${sort=='productName' && dir=='asc' ? 'desc' : 'asc'},sellerId=${sellerId})}">
+                                        Name <i class="bi bi-arrow-down-up ms-1 small"></i>
+                                    </a>
+                                </th>
+                                <th class="col-cat">
+                                    <a th:href="@{/admin/products(page=0,sort='category',dir=${sort=='category' && dir=='asc' ? 'desc' : 'asc'},sellerId=${sellerId})}">
+                                        Cat <i class="bi bi-arrow-down-up ms-1 small"></i>
+                                    </a>
+                                </th>
+                                <th class="col-price">
+                                    <a th:href="@{/admin/products(page=0,sort='price',dir=${sort=='price' && dir=='asc' ? 'desc' : 'asc'},sellerId=${sellerId})}">
+                                        Price <i class="bi bi-arrow-down-up ms-1 small"></i>
+                                    </a>
+                                </th>
+                                <th class="col-status">Status</th>
+                                <th class="col-seller">
+                                    <a th:href="@{/admin/products(page=0,sort='sellerId',dir=${sort=='sellerId' && dir=='asc' ? 'desc' : 'asc'},sellerId=${sellerId})}">
+                                        Seller <i class="bi bi-arrow-down-up ms-1 small"></i>
+                                    </a>
+                                </th>
+                                <th class="col-actions">Actions</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            <tr th:each="product : ${products}">
+                                <td class="text-muted fw-bold" th:text="${product.productId}"></td>
+                                <td class="fw-semibold" th:text="${product.productName}"></td>
+                                <td th:text="${product.category}"></td>
+                                <td th:text="'₹' + ${product.price}"></td>
+                                <td>
+                                    <span class="badge"
+                                          th:classappend="${#strings.toUpperCase(product.status) == 'AVAILABLE' ? 'bg-success' : 'bg-danger'}"
+                                          th:text="${product.status}">
+                                    </span>
+                                </td>
+                                <td th:text="${product.sellerId}"></td>
+                                <td>
+                                    <div class="d-flex justify-content-center gap-2">
+                                        <a th:href="@{'/admin/products/edit/' + ${product.productId}}"
+                                           class="btn btn-sm btn-outline-primary shadow-sm" title="Edit">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </a>
+
+                                        <form th:action="@{'/admin/products/delete/' + ${product.productId}}"
+                                              method="post"
+                                              onsubmit="return confirm('Are you sure you want to delete this product?');"
+                                              style="display:inline;">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger shadow-sm" title="Delete">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(products)}">
+                                <td colspan="7" class="text-muted py-5">No products found for this search.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mt-3" th:if="${productPage.totalPages > 0}">
+                    <div>
+                        <span class="small text-muted" th:text="'Showing ' + ${productPage.number * productPage.size + 1} + ' - ' + ${productPage.number * productPage.size + productPage.numberOfElements} + ' of ' + ${productPage.totalElements}"></span>
+                    </div>
+                    <nav>
+                        <ul class="pagination pagination-sm mb-0">
+                            <li class="page-item" th:classappend="${productPage.first} ? 'disabled'">
+                                <a class="page-link" th:href="@{/admin/products(page=${productPage.number-1},sort=${sort},dir=${dir},sellerId=${sellerId})}">Prev</a>
+                            </li>
+                            <li class="page-item" th:each="i : ${#numbers.sequence(0, productPage.totalPages-1)}" th:classappend="${productPage.number==i} ? 'active'">
+                                <a class="page-link" th:href="@{/admin/products(page=${i},sort=${sort},dir=${dir},sellerId=${sellerId})}" th:text="${i+1}"></a>
+                            </li>
+                            <li class="page-item" th:classappend="${productPage.last} ? 'disabled'">
+                                <a class="page-link" th:href="@{/admin/products(page=${productPage.number+1},sort=${sort},dir=${dir},sellerId=${sellerId})}">Next</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
         </div>
 
-
+        <footer class="footer">
+            © 2026 GencFashion. Secure Inventory Management.
+        </footer>
     </div>
 </div>
 

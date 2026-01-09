@@ -26,10 +26,18 @@ public class Variant implements Serializable {
 
     @Column(name = "stockQuantity")
     private Integer stockQuantity;
+    
 
     public enum Size {
         S, M, L, XL
     }
+    
+    @Column(name = "is_active")
+    private Boolean isActive = true; // Default to true
+
+    // Add Getter/Setter
+    public Boolean isActive() { return isActive; }
+    public void setActive(Boolean active) { this.isActive = active; }
 
     public Variant() {}
 

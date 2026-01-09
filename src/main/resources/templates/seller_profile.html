@@ -1,147 +1,211 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-
+ 
 <head>
     <title>Seller | Profile</title>
-
+ 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
-
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+ 
     <style>
-        body {
-            background-color: #f1f5f9;
-            font-family: 'Segoe UI', sans-serif;
-        }
-
-        .dashboard-wrapper {
-            display: flex;
-            min-height: 100vh;
-        }
-
+        body { background-color: #f8fafc; font-family: 'Inter', sans-serif; margin: 0; height: 100vh; overflow: hidden; }
+        .dashboard-wrapper { display: flex; height: 100vh; width: 100%; }
+ 
+        /* ================= SIDEBAR ================= */
         .sidebar {
-            width: 270px;
-            background: linear-gradient(180deg, #1e40af, #1e3a8a);
-            color: white;
-            padding: 25px 20px;
-            display: flex;
-            flex-direction: column;
+            width: 250px; background: linear-gradient(180deg, #1a1a2e, #222255) !important;
+            color: white; padding: 26px 22px; display: flex; flex-direction: column; flex-shrink: 0;
         }
-
-        .sidebar h4 {
-            font-weight: 700;
-            margin-bottom: 35px;
-        }
-
+        .sidebar h4 { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.6rem; margin-bottom: 38px; }
+        .sidebar h4 span { color: #e94560; }
         .sidebar a {
+            display: flex; align-items: center; gap: 12px; padding: 12px 15px; color: #e5e7eb;
+            text-decoration: none; border-radius: 10px; margin-bottom: 10px; font-size: 0.95rem; transition: 0.25s;
+        }
+        .sidebar a:hover, .sidebar a.active { background-color: rgba(233, 69, 96, 0.22) !important; color: white; }
+        .sidebar .logout { margin-top: auto; color: #fecaca; }
+ 
+        /* ================= MAIN AREA ================= */
+        .main-area { flex-grow: 1; display: flex; flex-direction: column; overflow-y: auto; background-color: #f8fafc; }
+        .content { flex-grow: 1; padding: 34px 40px; }
+        .page-header h3 { font-family: 'Playfair Display', serif; font-weight: 700; }
+ 
+        /* ================= CONTAINER HOVER EFFECTS ================= */
+        .profile-card, .panel, .pro-tip-box {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: default;
+            border: 1px solid transparent;
+        }
+ 
+        .profile-card:hover, .panel:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12) !important;
+            border-color: rgba(233, 69, 96, 0.3) !important;
+        }
+ 
+        .pro-tip-box:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 35px rgba(26, 26, 46, 0.25) !important;
+        }
+ 
+        /* ================= PROFILE CARD ================= */
+        .profile-card {
+            background: white; border-radius: 16px; padding: 40px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            display: flex; flex-direction: column; height: 100%;
+        }
+ 
+        .profile-avatar {
+            width: 80px; height: 80px; background: linear-gradient(135deg, #e94560, #222255); color: white;
+            border-radius: 20px; display: flex; align-items: center;
+            justify-content: center; font-size: 2.2rem; font-weight: 700;
+            margin-bottom: 25px; box-shadow: 0 5px 15px rgba(233, 69, 96, 0.3);
+            font-family: 'Playfair Display', serif;
+        }
+ 
+        .info-label { font-size: 0.8rem; color: #64748b; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 4px; }
+        .info-value { font-size: 1.1rem; color: #1a1a2e; font-weight: 600; margin-bottom: 22px; }
+ 
+        /* ================= RIGHT SIDE PANELS ================= */
+        .panel {
+            background: white; border-radius: 16px; padding: 25px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08); height: 100%;
+        }
+        .panel h5 { font-family: 'Playfair Display', serif; font-weight: 700; color: #1a1a2e; margin-bottom: 15px; }
+        
+        .mini-stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .mini-stat {
+            background: #f8fafc; border-radius: 12px; padding: 15px; text-align: center; border: 1px solid #f1f5f9;
+            transition: 0.3s;
+        }
+        .mini-stat:hover { background: white; border-color: #e94560; }
+        .mini-stat i { font-size: 1.4rem; color: #e94560; display: block; margin-bottom: 5px; }
+        .mini-stat span { font-size: 0.8rem; font-weight: 600; color: #64748b; }
+ 
+        .pro-tip-box {
+            background: linear-gradient(135deg, #1a1a2e, #2b2b4d); color: white;
+            border-radius: 16px; padding: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        .pro-tip-box h5 { color: #e94560; font-family: 'Playfair Display', serif; font-weight: 700; }
+ 
+        /* ================= DATA SYNC CARD (LEFT ALIGNED) ================= */
+        .sync-card {
+            background: #f1f5f9;
+            border-radius: 12px;
+            padding: 16px;
+            border: 1px solid #e2e8f0;
             display: flex;
             align-items: center;
+            justify-content: flex-start; /* Aligns to left */
             gap: 12px;
-            padding: 12px 15px;
-            color: #e5e7eb;
-            text-decoration: none;
-            border-radius: 10px;
-            margin-bottom: 10px;
-            font-size: 0.95rem;
-        }
-
-        .sidebar a:hover,
-        .sidebar a.active {
-            background-color: rgba(255,255,255,0.18);
-            color: white;
-        }
-
-        .sidebar .logout {
             margin-top: auto;
-            color: #fecaca;
+            text-align: left;
         }
-
-        .content {
-            flex-grow: 1;
-            padding: 30px 35px;
-        }
-
-        .profile-card {
-            background: white;
-            border-radius: 16px;
-            padding: 30px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
-            max-width: 500px;
-        }
-
-        .profile-label {
-            font-size: 0.85rem;
+        .sync-card i {
+            font-size: 1.2rem;
             color: #64748b;
         }
-
-        .profile-value {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: #1e40af;
+ 
+        .footer {
+            background: #0f172a; color: #e5e7eb; text-align: center;
+            padding: 1.2rem 0; font-size: 0.9rem; margin-top: auto;
         }
     </style>
 </head>
-
+ 
 <body>
-
+ 
 <div class="dashboard-wrapper">
-
-    <!-- SIDEBAR -->
     <div class="sidebar">
-        <h4>Fashion Store</h4>
-
-        <a href="/seller/dashboard">
-            <i class="bi bi-speedometer2"></i> Dashboard
-        </a>
-
-        <a href="/seller/products">
-            <i class="bi bi-box-seam"></i> My Products
-        </a>
-
-        <a href="/seller/manage-orders">
-            <i class="bi bi-bag-check"></i> Orders
-        </a>
-
-        <a href="/seller/profile" class="active">
-            <i class="bi bi-person-circle"></i> Profile
-        </a>
-
-        <a href="/logout" class="logout">
-            <i class="bi bi-box-arrow-right"></i> Logout
-        </a>
+        <h4>Genc<span>Fashion</span></h4>
+        <a href="/seller/dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a>
+        <a href="/seller/products"><i class="bi bi-box-seam"></i> My Products</a>
+        <a href="/seller/manage-orders"><i class="bi bi-bag-check"></i> Orders</a>
+        <a href="/seller/profile" class="active"><i class="bi bi-person-circle"></i> Profile</a>
+        <a href="/logout" class="logout"><i class="bi bi-box-arrow-right"></i> Logout</a>
     </div>
-
-    <!-- CONTENT -->
-    <div class="content">
-
-        <h3 class="mb-4">Seller Profile</h3>
-        <p class="text-muted mb-4">
-            View your account information associated with selling on the platform.
-        </p>
-
-        <div class="profile-card">
-            <div class="mb-3">
-                <div class="profile-label">Username</div>
-                <div class="profile-value" th:text="${username}">seller</div>
+ 
+    <div class="main-area">
+        <div class="content">
+            <div class="page-header mb-4">
+                <h3 class="fw-bold">Seller Profile</h3>
+                <p class="text-muted">Account details and store credentials</p>
             </div>
-
-            <div class="mb-3">
-                <div class="profile-label">Email</div>
-                <div class="profile-value" th:text="${email}">seller@email.com</div>
-            </div>
-
-            <div class="mb-3">
-                <div class="profile-label">Role</div>
-                <div class="profile-value" th:text="${role}">SELLER</div>
-            </div>
-
-            <div class="alert alert-info mt-4">
-                Profile details are managed by the platform administrator.
+ 
+            <div class="row g-4">
+                <div class="col-md-5">
+                    <div class="profile-card">
+                        <div class="profile-avatar" th:text="${username != null ? #strings.substring(username,0,1).toUpperCase() : 'S'}">S</div>
+                        
+                        <div class="info-label">Username</div>
+                        <div class="info-value" th:text="${username}">SellerName</div>
+ 
+                        <div class="info-label">Email Address</div>
+                        <div class="info-value" th:text="${email}">seller@gencfashion.com</div>
+ 
+                        <div class="info-label">Account Role</div>
+                        <div class="mb-4">
+                            <span class="badge rounded-pill px-3 py-2"
+                                  style="background-color: rgba(233, 69, 96, 0.1); color: #e94560; border: 1px solid #e94560;"
+                                  th:text="${role}">SELLER</span>
+                        </div>
+ 
+                        <div class="sync-card">
+                            <i class="bi bi-arrow-repeat"></i>
+                            <p class="small text-muted mb-0">
+                                Data synced with <strong>GencFashion</strong> Merchant Services.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+ 
+                <div class="col-md-7">
+                    <div class="row g-4">
+                        <div class="col-12">
+                            <div class="panel">
+                                <h5>Store Snapshot</h5>
+                                <p class="text-muted small mb-4">Real-time trust metrics for your merchant account.</p>
+                                <div class="mini-stat-grid">
+                                    <div class="mini-stat">
+                                        <i class="bi bi-patch-check-fill"></i>
+                                        <span>Verified Merchant</span>
+                                    </div>
+                                    <div class="mini-stat">
+                                        <i class="bi bi-lightning-charge-fill"></i>
+                                        <span>Fast Delivery</span>
+                                    </div>
+                                    <div class="mini-stat">
+                                        <i class="bi bi-shield-lock-fill"></i>
+                                        <span>Secure Account</span>
+                                    </div>
+                                    <div class="mini-stat">
+                                        <i class="bi bi-clock-history"></i>
+                                        <span>Fast Responder</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+ 
+                        <div class="col-12">
+                            <div class="pro-tip-box">
+                                <h5>Pro Tip</h5>
+                                <p class="small mb-0" style="color: #cbd5e1; line-height: 1.6;">
+                                    High-quality product images and detailed descriptions can increase your conversion rates by up to 40%. Regularly update your inventory to stay featured on the homepage!
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-
+ 
+        <footer class="footer">
+            © 2026 GencFashion. All rights reserved.
+        </footer>
     </div>
 </div>
-
+ 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

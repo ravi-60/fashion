@@ -30,7 +30,7 @@ public class Product {
     @Column(name = "status")
     private Status status;
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "product", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JsonManagedReference
     private List<Variant> variants;
 

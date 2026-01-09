@@ -103,6 +103,7 @@ public class OrderService {
         return orderRepository.findById(orderId);
     }
 
+    @Transactional
     public void cancelOrder(Long orderId) {
         orderRepository.findById(orderId).ifPresent(order -> {
             if (order.getStatus() != OrderInfo.OrderStatus.DELIVERED) {

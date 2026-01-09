@@ -2,130 +2,242 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
 <head>
-    <title>Your Cart | Fashion Store</title>
+    <title>Your Cart | GencFashion</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
         body {
-            background-color: #f4f6f9;
-            font-family: 'Segoe UI', sans-serif;
+            background-color: #f8fafc;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* ================= NAVBAR ================= */
+        .navbar {
+            background: #ffffff;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            padding: 15px 0;
+        }
+
+        .navbar-brand {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #1a1a2e;
+            text-decoration: none;
+        }
+
+        .navbar-brand span {
+            color: #e94560;
+        }
+
+        /* ================= CART STYLING ================= */
+        .page-wrapper {
+            flex: 1 0 auto;
+            padding-top: 120px;
+            padding-bottom: 60px;
         }
 
         .cart-card {
             background: #ffffff;
-            border-radius: 14px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            border: 1px solid #e2e8f0;
+            padding: 2rem;
         }
 
-        .price {
+        .table thead th {
+            border-top: none;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 0.05em;
+            color: #64748b;
+            padding-bottom: 1.5rem;
+        }
+
+        .product-name {
+            font-weight: 700;
+            color: #1a1a2e;
+            font-size: 1.1rem;
+        }
+
+        .variant-info {
+            font-size: 0.9rem;
+            color: #64748b;
+        }
+
+        .price-text {
             font-weight: 600;
-            color: #198754;
+            color: #1a1a2e;
         }
 
-        .table th {
-            background-color: #f8f9fa;
+        .total-text {
+            font-weight: 700;
+            color: #e94560;
         }
 
-        .empty-cart {
-            background: #ffffff;
-            padding: 40px;
-            border-radius: 14px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        .empty-cart-container {
             text-align: center;
+            padding: 4rem 2rem;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        }
+
+        .btn-update {
+            padding: 0.25rem 0.75rem;
+            font-size: 0.85rem;
+        }
+
+        /* ================= FOOTER ================= */
+        .footer {
+            background: #0f172a;
+            color: #e5e7eb;
+            text-align: center;
+            padding: 20px 0;
+            font-size: 0.9rem;
         }
     </style>
 </head>
 
 <body>
 
-<div class="container mt-5">
+<nav class="navbar navbar-expand-lg fixed-top">
+    <div class="container">
+        <a class="navbar-brand" th:href="@{/products}">
+            Genc<span>Fashion</span>
+        </a>
+        <div class="ms-auto d-flex align-items-center gap-4">
+            <a th:href="@{/products}" class="text-dark text-decoration-none fw-medium d-none d-md-block">
+                <i class="bi bi-bag me-1"></i> Shop
+            </a>
+            <a th:href="@{/orders}" class="text-dark text-decoration-none fw-medium d-none d-md-block">
+                <i class="bi bi-box-seam me-1"></i> Orders
+            </a>
+            <div class="dropdown">
+                <a class="nav-link dropdown-toggle fw-bold text-dark d-flex align-items-center gap-2" href="#" role="button" data-bs-toggle="dropdown">
+                    <i class="bi bi-person-circle fs-4"></i>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-3">
+                    <li><a class="dropdown-item py-2" th:href="@{/orders}">My Orders</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item py-2 text-danger" th:href="@{/logout}">Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</nav>
 
-    <!-- Back -->
-    <a th:href="@{/products}" class="btn btn-outline-secondary mb-4">
-        ← Continue Shopping
-    </a>
+<div class="container page-wrapper">
 
-    <h2 class="mb-4 fw-bold">Shopping Cart</h2>
-
-    <!-- Empty Cart -->
-    <div th:if="${cartItems.empty}" class="empty-cart">
-        <h4>Your cart is empty</h4>
-        <p class="text-muted mb-3">Looks like you haven’t added anything yet.</p>
-        <a th:href="@{/products}" class="btn btn-dark">Browse Products</a>
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <a th:href="@{/products}" class="text-muted text-decoration-none small fw-medium">
+            <i class="bi bi-arrow-left"></i> CONTINUE SHOPPING
+        </a>
+        <h2 class="fw-bold m-0">Your Shopping Bag</h2>
     </div>
 
-    <!-- Cart Items -->
-    <div th:unless="${cartItems.empty}" class="cart-card">
+    <div th:if="${cartItems.empty}" class="empty-cart-container">
+        <i class="bi bi-cart-x text-muted mb-3" style="font-size: 4rem;"></i>
+        <h3 class="fw-bold">Your bag is empty</h3>
+        <p class="text-muted mb-4">Looks like you haven't added anything yet. Start exploring our latest trends!</p>
+        <a th:href="@{/products}" class="btn btn-dark btn-lg px-5" style="background-color: #1a1a2e; border-radius: 8px;">
+            Shop Collection
+        </a>
+    </div>
 
+    <div th:unless="${cartItems.empty}" class="cart-card">
         <div class="table-responsive">
             <table class="table align-middle">
                 <thead>
-                <tr>
-                    <th>Product</th>
-                    <th>Variant</th>
-                    <th>Price</th>
-                    <th>Qty</th>
-                    <th>Total</th>
-                    <th></th>
-                </tr>
+                    <tr>
+                        <th scope="col">Product Details</th>
+                        <th scope="col">Price</th>
+                        <th scope="col" style="width: 180px;">Quantity</th>
+                        <th scope="col">Subtotal</th>
+                        <th scope="col"></th>
+                    </tr>
                 </thead>
-
                 <tbody>
-                <tr th:each="item : ${cartItems}">
-                    <td>
-                        <strong th:text="${item.variant.product.productName}">Product</strong>
-                    </td>
+                    <tr th:each="item : ${cartItems}">
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div>
+                                    <div class="product-name" th:text="${item.variant.product.productName}">Product Name</div>
+                                    <div class="variant-info">
+                                        Size: <span class="fw-medium" th:text="${item.variant.size}">M</span> | 
+                                        Color: <span class="fw-medium" th:text="${item.variant.color}">Blue</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
 
-                    <td class="text-muted">
-                        <span th:text="${item.variant.size}"></span> /
-                        <span th:text="${item.variant.color}"></span>
-                    </td>
+                        <td class="price-text">
+                            ₹<span th:text="${item.variant.product.price}">0.00</span>
+                        </td>
 
-                    <td class="price">
-                        ₹<span th:text="${item.variant.product.price}">0</span>
-                    </td>
+                        <td>
+                            <form th:action="@{/cart/update}" method="post" class="d-flex align-items-center gap-2">
+                                <input type="hidden" name="cartItemId" th:value="${item.cartItemId}" />
+                                <input type="number" name="quantity" min="1" 
+                                       th:max="${item.variant.stockQuantity}"
+                                       class="form-control form-control-sm border-2 text-center" 
+                                       th:value="${item.quantity}" style="width: 70px; border-radius: 6px;" />
+                                <button type="submit" class="btn btn-outline-dark btn-sm btn-update">
+                                    <i class="bi bi-arrow-repeat"></i>
+                                </button>
+                            </form>
+                        </td>
 
-                    <td>
-                        <form th:action="@{/cart/update}" method="post" class="d-flex align-items-center gap-2">
-                            <input type="hidden" name="cartItemId" th:value="${item.cartItemId}" />
-                            <input type="number" name="quantity" min="0" th:max="${item.variant.stockQuantity}"
-                                   class="form-control form-control-sm" style="width:80px;" th:value="${item.quantity}" />
-                            <button type="submit" class="btn btn-sm btn-outline-primary">Update</button>
-                        </form>
-                    </td>
+                        <td class="total-text">
+                            ₹<span th:text="${item.variant.product.price.multiply(new java.math.BigDecimal(item.quantity))}">0.00</span>
+                        </td>
 
-                    <td class="price">
-                        ₹<span
-                            th:text="${item.variant.product.price.multiply(new java.math.BigDecimal(item.quantity))}">
-                        </span>
-                    </td>
-
-                    <td>
-                        <form th:action="@{/cart/remove}" method="post">
-                            <input type="hidden" name="cartItemId" th:value="${item.cartItemId}" />
-                            <button type="submit" class="btn btn-outline-danger btn-sm">
-                                Remove
-                            </button>
-                        </form>
-                    </td>
-                </tr>
+                        <td class="text-end">
+                            <form th:action="@{/cart/remove}" method="post">
+                                <input type="hidden" name="cartItemId" th:value="${item.cartItemId}" />
+                                <button type="submit" class="btn btn-link text-danger p-0">
+                                    <i class="bi bi-trash fs-5"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
                 </tbody>
             </table>
         </div>
 
-        <!-- Checkout -->
-        <div class="d-flex justify-content-end mt-3">
-            <form th:action="@{/cart/checkout}" method="post">
-                <button type="submit" class="btn btn-success btn-lg">
-                    Proceed to Checkout
-                </button>
-            </form>
+        <div class="mt-5 pt-4 border-top">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <p class="text-muted small mb-md-0">
+                        <i class="bi bi-shield-check me-1"></i> Secure Checkout & Easy Returns.
+                    </p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <form th:action="@{/cart/checkout}" method="post">
+                        <button type="submit" class="btn btn-dark btn-lg px-5 py-3" style="background-color: #1a1a2e; border-radius: 12px; font-weight: 600;">
+                            Proceed to Checkout <i class="bi bi-arrow-right ms-2"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
         </div>
-
     </div>
 </div>
+
+<footer class="footer mt-auto">
+    <div class="container">
+        © 2026 GencFashion. All rights reserved.
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
 </html>

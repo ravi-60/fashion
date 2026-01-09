@@ -2,280 +2,230 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
 <head>
-<title>Seller Dashboard | Fashion Store</title>
+    <title>Seller Dashboard | GencFashion</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
-<link
-	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
-	rel="stylesheet">
-<link
-	href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
-	rel="stylesheet">
+    <style>
+        /* Layout Locking */
+        body {
+            background-color: #f8fafc;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            height: 100vh;
+            overflow: hidden;
+        }
 
-<style>
-body {
-	background-color: #f1f5f9;
-	font-family: 'Segoe UI', sans-serif;
-}
+        .dashboard-wrapper {
+            display: flex;
+            height: 100vh;
+            width: 100%;
+        }
 
-.dashboard-wrapper {
-	display: flex;
-	min-height: 100vh;
-}
+        /* ================= FIXED SIDEBAR ================= */
+        .sidebar {
+            width: 260px;
+            background: linear-gradient(180deg, #1a1a2e, #222255) !important;
+            color: white;
+            padding: 26px 22px;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            height: 100vh;
+        }
 
-.sidebar {
-	width: 270px;
-	background: linear-gradient(180deg, #1e40af, #1e3a8a);
-	color: white;
-	padding: 25px 20px;
-	display: flex;
-	flex-direction: column;
-}
+        .sidebar h4 { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.6rem; margin-bottom: 38px; }
+        .sidebar h4 span { color: #e94560; }
+        .sidebar a { display: flex; align-items: center; gap: 12px; padding: 12px 15px; color: #e5e7eb; text-decoration: none; border-radius: 10px; margin-bottom: 10px; font-size: 0.95rem; transition: 0.25s; }
+        .sidebar a:hover, .sidebar a.active { background-color: rgba(233, 69, 96, 0.22) !important; color: white; }
+        .sidebar .logout { margin-top: auto; color: #fecaca; }
 
-.sidebar h4 {
-	font-weight: 700;
-	margin-bottom: 35px;
-	letter-spacing: 1px;
-}
+        /* ================= SCROLLABLE MAIN AREA ================= */
+        .main-area {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            background-color: #f8fafc;
+        }
 
-.sidebar a {
-	display: flex;
-	align-items: center;
-	gap: 12px;
-	padding: 12px 15px;
-	color: #e5e7eb;
-	text-decoration: none;
-	border-radius: 10px;
-	margin-bottom: 10px;
-	font-size: 0.95rem;
-}
+        .content { flex-grow: 1; padding: 34px 40px; }
+        .page-header h3 { font-family: 'Playfair Display', serif; font-weight: 700; }
 
-.sidebar a:hover, .sidebar a.active {
-	background-color: rgba(255, 255, 255, 0.18);
-	color: white;
-}
+        /* ================= STAT CARDS ================= */
+        .stat-card {
+            border-radius: 16px;
+            border: 1px solid transparent;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            padding: 24px;
+            height: 100%;
+            background: white;
+            transition: all 0.3s ease;
+        }
 
-.sidebar .logout {
-	margin-top: auto;
-	color: #fecaca;
-}
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+            border-color: rgba(233, 69, 96, 0.2);
+        }
 
-.content {
-	flex-grow: 1;
-	padding: 30px 35px;
-}
+        .stat-icon { 
+            font-size: 1.8rem; 
+            color: #e94560; 
+            background: rgba(233, 69, 96, 0.1);
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            margin-bottom: 15px;
+        }
+        
+        .stat-title { font-size: 0.85rem; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .stat-value { font-size: 1.8rem; font-weight: 700; color: #1a1a2e; margin-top: 5px; }
 
-.page-header {
-	margin-bottom: 30px;
-}
+        /* ================= PANELS ================= */
+        .panel {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.04);
+            height: 100%;
+            border: 1px solid #edf2f7;
+        }
 
-.page-header h3 {
-	font-weight: 700;
-}
+        .panel h5 { font-weight: 700; margin-bottom: 18px; color: #1a1a2e; display: flex; align-items: center; gap: 10px; }
+        .info-text { font-size: 0.95rem; color: #475569; line-height: 1.6; }
 
-.breadcrumb {
-	font-size: 0.85rem;
-}
+        .resp-list { padding-left: 0; list-style: none; }
+        .resp-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 12px;
+            font-size: 0.9rem;
+            color: #475569;
+        }
+        .resp-list i { color: #e94560; font-size: 1.1rem; }
 
-.stat-card {
-	border-radius: 16px;
-	border: none;
-	box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
-	padding: 20px;
-	height: 100%;
-}
+        /* BUTTONS */
+        .btn-crimson { background-color: #e94560; color: white; border: none; padding: 12px 20px; border-radius: 10px; font-weight: 600; transition: 0.3s; }
+        .btn-crimson:hover { background-color: #c62d48; color: white; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(233, 69, 96, 0.3); }
+        .btn-outline-dark { border-radius: 10px; padding: 12px 20px; font-weight: 600; border-width: 2px; }
 
-.stat-icon {
-	font-size: 1.8rem;
-	color: #2563eb;
-}
-
-.stat-title {
-	font-size: 0.85rem;
-	color: #64748b;
-	margin-top: 10px;
-}
-
-.stat-value {
-	font-size: 1.7rem;
-	font-weight: 700;
-	color: #1e40af;
-}
-
-.panel {
-	background: white;
-	border-radius: 16px;
-	padding: 22px;
-	box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
-	height: 100%;
-}
-
-.panel h5 {
-	font-weight: 600;
-	margin-bottom: 15px;
-}
-
-.panel ul {
-	padding-left: 18px;
-	margin-bottom: 0;
-}
-
-.panel ul li {
-	font-size: 0.9rem;
-	color: #475569;
-	margin-bottom: 8px;
-}
-
-.info-text {
-	font-size: 0.9rem;
-	color: #475569;
-	line-height: 1.5;
-}
-</style>
+        .footer {
+            background: #0f172a; color: #e5e7eb; text-align: center;
+            padding: 1.2rem 0; font-size: 0.9rem; border-top: 1px solid rgba(255,255,255,0.1);
+        }
+    </style>
 </head>
 
 <body>
 
-	<div class="dashboard-wrapper">
+    <div class="dashboard-wrapper">
+        <div class="sidebar">
+            <h4>Genc<span>Fashion</span></h4>
+            <a href="/seller/dashboard" class="active"><i class="bi bi-speedometer2"></i> Dashboard</a>
+            <a href="/seller/products"><i class="bi bi-box-seam"></i> My Products</a>
+            <a href="/seller/manage-orders"><i class="bi bi-bag-check"></i> Orders</a>
+            <a href="/seller/profile"><i class="bi bi-person-circle"></i> Profile</a>
+            <a href="/logout" class="logout"><i class="bi bi-box-arrow-right"></i> Logout</a>
+        </div>
 
-		<!-- SIDEBAR -->
-		<div class="sidebar">
-			<h4>Fashion Store</h4>
+        <div class="main-area">
+            <div class="content">
+                <div class="page-header mb-4">
+                    <h3 class="fw-bold">Welcome, <span th:text="${username}">Seller</span></h3>
+                    <p class="text-muted">Here is what's happening with your store today.</p>
+                </div>
 
-			<a href="#" class="active"> <i class="bi bi-speedometer2"></i>
-				Dashboard
-			</a> <a href="/seller/products"> <i class="bi bi-box-seam"></i> My
-				Products
-			</a> <a href="/seller/manage-orders"> <i class="bi bi-bag-check"></i>
-				Orders
-			</a> <a href="/seller/profile"> <i class="bi bi-person-circle"></i>
-				Profile
-			</a> <a href="/logout" class="logout"> <i
-				class="bi bi-box-arrow-right"></i> Logout
-			</a>
-		</div>
+                <div class="row g-4 mb-5">
+                    <div class="col-md-3">
+                        <div class="stat-card">
+                            <div class="stat-icon"><i class="bi bi-box"></i></div>
+                            <div class="stat-title">Total Products</div>
+                            <div class="stat-value" th:text="${totalProducts}">0</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card">
+                            <div class="stat-icon"><i class="bi bi-receipt"></i></div>
+                            <div class="stat-title">Total Orders</div>
+                            <div class="stat-value" th:text="${totalOrders}">0</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card">
+                            <div class="stat-icon"><i class="bi bi-currency-rupee"></i></div>
+                            <div class="stat-title">Total Earnings</div>
+                            <div class="stat-value">₹<span th:text="${totalEarnings}">0</span></div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card">
+                            <div class="stat-icon"><i class="bi bi-graph-up-arrow"></i></div>
+                            <div class="stat-title">Avg Order Value</div>
+                            <div class="stat-value">₹<span th:text="${averageOrderValue}">0</span></div>
+                        </div>
+                    </div>
+                </div>
 
-		<!-- CONTENT -->
-		<div class="content">
+                <div class="row g-4 mb-4">
+                    <div class="col-md-6">
+                        <div class="panel">
+                            <h5><i class="bi bi-info-circle text-primary"></i> Order Lifecycle</h5>
+                            <p class="info-text">Efficiently track your business flow. Orders typically move through these stages:</p>
+                            <ul class="resp-list mt-3">
+                                <li><i class="bi bi-check2-circle"></i> <strong>Delivered:</strong> Only these contribute to your earnings.</li>
+                                <li><i class="bi bi-clock-history"></i> <strong>Placed:</strong> Pending fulfillment by your team.</li>
+                                <li><i class="bi bi-x-circle"></i> <strong>Cancelled:</strong> Stock is automatically restored.</li>
+                            </ul>
+                        </div>
+                    </div>
 
-			<div class="page-header">
-				<nav class="breadcrumb mb-2">
-					<span class="breadcrumb-item">Seller</span> <span
-						class="breadcrumb-item active">Dashboard</span>
-				</nav>
-				<h3>
-					Welcome, <span th:text="${username}"></span>
-				</h3>
-				<p class="text-muted">Seller overview and platform guidance</p>
-			</div>
+                    <div class="col-md-6">
+                        <div class="panel">
+                            <h5><i class="bi bi-lightning-charge text-warning"></i> Growth Guidelines</h5>
+                            <p class="info-text">Boost your sales visibility by following these platform best practices:</p>
+                            <ul class="resp-list mt-3">
+                                <li><i class="bi bi-camera"></i> High-quality images increase trust by 40%.</li>
+                                <li><i class="bi bi-box-seam"></i> Keep stock updated to avoid "Out of Stock" penalties.</li>
+                                <li><i class="bi bi-hand-thumbs-up"></i> Faster shipping leads to better seller ratings.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
 
-			<!-- STATS -->
-			<div class="row g-4 mb-4">
-				<div class="col-md-3">
-					<div class="stat-card">
-						<div class="stat-icon">
-							<i class="bi bi-box"></i>
-						</div>
-						<div class="stat-title">Total Products</div>
-						<div class="stat-value" th:text="${totalProducts}">0</div>
-					</div>
-				</div>
+                <div class="row g-4">
+                    <div class="col-md-8">
+                        <div class="panel">
+                            <h5><i class="bi bi-shop"></i> Store Activity Monitor</h5>
+                            <p class="info-text">
+                                The GencFashion seller portal provides real-time monitoring. Analyze your <strong>Average Order Value</strong> and total reach to strategically plan your next fashion collection launch. Keeping your profile updated ensures buyers can reach you easily.
+                            </p>
+                        </div>
+                    </div>
 
-				<div class="col-md-3">
-					<div class="stat-card">
-						<div class="stat-icon">
-							<i class="bi bi-receipt"></i>
-						</div>
-						<div class="stat-title">Total Orders</div>
-						<div class="stat-value" th:text="${totalOrders}">0</div>
-					</div>
-				</div>
+                    <div class="col-md-4">
+                        <div class="panel d-flex flex-column justify-content-center">
+                            <h5 class="text-center">Quick Actions</h5>
+                            <div class="d-grid gap-3 mt-3">
+                                <a href="/seller/products" class="btn btn-crimson">Manage Products</a>
+                                <a href="/seller/manage-orders" class="btn btn-outline-dark">View My Orders</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-				<div class="col-md-3">
-					<div class="stat-card">
-						<div class="stat-icon">
-							<i class="bi bi-currency-rupee"></i>
-						</div>
-						<div class="stat-title">Total Earnings</div>
-						<div class="stat-value" th:text="${totalEarnings}">₹0</div>
-					</div>
-				</div>
+            <footer class="footer">
+                © 2026 GencFashion. Seller Administration Portal.
+            </footer>
+        </div>
+    </div>
 
-				<div class="col-md-3">
-					<div class="stat-card">
-						<div class="stat-icon">
-							<i class="bi bi-graph-up-arrow"></i>
-						</div>
-						<div class="stat-title">Avg Order Value</div>
-						<div class="stat-value">
-							₹<span th:text="${averageOrderValue}">0</span>
-						</div>
-					</div>
-				</div>
-
-				<!-- INFO PANELS -->
-				<div class="row g-4 mb-4">
-
-					<div class="col-md-6">
-						<div class="panel">
-							<h5>Order Lifecycle Information</h5>
-							<ul>
-								<li>Orders move through Placed, Delivered, or Cancelled
-									states.</li>
-								<li>Total orders include only successfully placed orders.</li>
-								<li>Cancelled orders do not contribute to earnings.</li>
-								<li>Order management actions are available in the Orders
-									section.</li>
-							</ul>
-						</div>
-					</div>
-
-					<div class="col-md-6">
-						<div class="panel">
-							<h5>Product Performance Guidelines</h5>
-							<ul>
-								<li>Top product is calculated based on total quantity sold.</li>
-								<li>Products with low stock should be monitored regularly.</li>
-								<li>Inactive products may affect seller visibility.</li>
-								<li>Performance data helps sellers plan inventory updates.</li>
-							</ul>
-						</div>
-					</div>
-
-				</div>
-
-				<!-- BOTTOM INFO -->
-				<div class="row g-4">
-
-					<div class="col-md-4">
-						<div class="panel">
-							<h5>Inventory Monitoring</h5>
-							<p class="info-text">Inventory status helps sellers track
-								stock availability across variants. Keeping sufficient stock
-								improves order fulfillment and customer satisfaction.</p>
-						</div>
-					</div>
-
-					<div class="col-md-4">
-						<div class="panel">
-							<h5>Seller Account Information</h5>
-							<p class="info-text">This section summarizes seller-level
-								account details such as product ownership, order responsibility,
-								and sales contribution within the platform.</p>
-						</div>
-					</div>
-
-					<div class="col-md-4">
-						<div class="panel">
-							<h5>Quick Actions</h5>
-							<a href="/seller/products" class="btn btn-primary w-100 mb-2">
-								Manage Products </a> <a href="/seller/manage-orders"
-								class="btn btn-outline-primary w-100"> View Orders </a>
-						</div>
-					</div>
-
-				</div>
-
-			</div>
-		</div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

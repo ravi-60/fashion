@@ -1,116 +1,205 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-
 <head>
-    <title>Register | Fashion Store</title>
+    <title>Register | GencFashion</title>
 
-    <!-- Bootstrap -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
     <style>
+        :root {
+            --primary: #1a1a2e;
+            --accent: #e94560;
+            --gray: #6c757d;
+            --input-bg: #f9f9fc;
+            --error: #dc3545;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
             min-height: 100vh;
-            background: linear-gradient(135deg, #111827, #1f2937);
+            font-family: 'Inter', sans-serif;
+            background: #ffffff;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-family: 'Segoe UI', sans-serif;
+            padding: 40px;
         }
 
-        .register-card {
+        .bg-blur {
+            position: fixed;
+            inset: 0;
+            background: url("/images/bg-fashion.jpg") center / cover no-repeat;
+            filter: blur(10px);
+            z-index: -1;
+            background-color: #fcfaf8;
+        }
+
+        .login-container {
             width: 100%;
-            max-width: 450px;
+            max-width: 960px;
+            min-height: 620px;
             background: #ffffff;
-            border-radius: 14px;
-            padding: 30px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+            border-radius: 24px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05), 0 25px 50px rgba(0,0,0,0.1);
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            overflow: hidden;
         }
 
-        .brand-title {
-            font-weight: 700;
-            letter-spacing: 1px;
+        .login-card {
+            padding: 40px 60px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
 
-        .form-control, .form-select {
-            border-radius: 8px;
-            padding: 10px 12px;
+        .login-image { width: 100%; height: 100%; }
+        .login-image img { width: 100%; height: 100%; object-fit: cover; }
+
+        .brand { text-align: center; margin-bottom: 20px; }
+        .brand h2 { font-family: 'Playfair Display', serif; font-size: 2.2rem; font-weight: 700; color: var(--primary); }
+        .brand h2 span { color: var(--accent); }
+        .brand::after { content: ""; display: block; width: 40px; height: 3px; background: var(--accent); margin: 8px auto 0; border-radius: 2px; }
+
+        .form-group { margin-bottom: 12px; }
+        label { font-size: 0.85rem; font-weight: 600; margin-bottom: 5px; display: block; color: #333; }
+
+        input, select {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+            background: var(--input-bg);
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
         }
 
-        .btn-register {
-            border-radius: 8px;
+        /* YOUR VALIDATION STYLES */
+        input.is-invalid, select.is-invalid {
+            border-color: var(--error) !important;
+            background-color: #fff8f8;
+        }
+
+        .error-feedback {
+            color: var(--error);
+            font-size: 0.75rem;
+            margin-top: 4px;
+            display: block;
+            font-weight: 500;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--accent);
+            background: #fff;
+            box-shadow: 0 0 0 4px rgba(233, 69, 96, 0.1);
+        }
+
+        .toggle-password { font-size: 0.75rem; color: var(--accent); cursor: pointer; font-weight: 500; }
+
+        .btn-login {
+            margin-top: 15px;
+            padding: 15px;
+            width: 100%;
+            border-radius: 12px;
+            border: none;
+            background: linear-gradient(135deg, #e94560, #ff6b81);
+            color: #fff;
+            font-size: 1rem;
             font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
         }
 
-        .toggle-password {
-            cursor: pointer;
-            font-size: 0.9rem;
-            color: #0d6efd;
+        .btn-login:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(233, 69, 96, 0.3); }
+
+        .footer-text { margin-top: 15px; text-align: center; font-size: 0.85rem; color: var(--gray); }
+        .footer-text a { color: var(--accent); text-decoration: none; font-weight: 600; }
+
+        @media (max-width: 900px) {
+            .login-container { grid-template-columns: 1fr; max-width: 480px; }
+            .login-image { display: none; }
         }
     </style>
 </head>
-
 <body>
+    <div class="bg-blur"></div>
 
-<div class="register-card">
+    <div class="login-container">
+        <div class="login-card">
+            <div class="brand">
+                <h2>Genc<span>Fashion</span></h2>
+                <p>Create your account</p>
+            </div>
 
-    <h3 class="text-center brand-title mb-1">Fashion Store</h3>
-    <p class="text-center text-muted mb-4">Create your account</p>
+            <div th:if="${errorMessage}" class="error-feedback text-center mb-3" th:text="${errorMessage}"></div>
 
-    <!-- Register Form -->
-    <form th:action="@{/register}" th:object="${user}" method="post" onsubmit="showLoading()">
+            <form th:action="@{/register}" th:object="${user}" method="post" onsubmit="showLoading()">
+                
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" th:field="*{username}" 
+                           placeholder="Choose username" 
+                           th:classappend="${#fields.hasErrors('username')} ? 'is-invalid' : ''">
+                    <span class="error-feedback" th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></span>
+                </div>
 
-        <div class="mb-3">
-            <label class="form-label">Username</label>
-            <input type="text" th:field="*{username}" class="form-control" placeholder="Enter username" required>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" th:field="*{email}" 
+                           placeholder="Enter email"
+                           th:classappend="${#fields.hasErrors('email')} ? 'is-invalid' : ''">
+                    <span class="error-feedback" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></span>
+                </div>
+
+                <div class="form-group">
+                    <div style="display: flex; justify-content: space-between;">
+                        <label>Password</label>
+                        <span class="toggle-password" onclick="togglePassword()">Show</span>
+                    </div>
+                    <input type="password" id="password" th:field="*{password}" 
+                           placeholder="Create password"
+                           th:classappend="${#fields.hasErrors('password')} ? 'is-invalid' : ''">
+                    <span class="error-feedback" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></span>
+                </div>
+
+                <div class="form-group">
+                    <label>Role</label>
+                    <select th:field="*{role}" th:classappend="${#fields.hasErrors('role')} ? 'is-invalid' : ''">
+                        <option value="" disabled selected>Select role</option>
+                        <option value="CUSTOMER">Customer</option>
+                        <option value="SELLER">Seller</option>
+                    </select>
+                    <span class="error-feedback" th:if="${#fields.hasErrors('role')}" th:errors="*{role}"></span>
+                </div>
+
+                <button type="submit" id="registerBtn" class="btn-login">Create Account</button>
+            </form>
+
+            <div class="footer-text">
+                Already have an account? <a th:href="@{/login}">Login here</a>
+            </div>
         </div>
 
-        <div class="mb-3">
-            <label class="form-label">Email</label>
-            <input type="email" th:field="*{email}" class="form-control" placeholder="Enter email" required>
+        <div class="login-image">
+            <img th:src="@{/images/register-fashion.jpg}" alt="Fashion Model">
         </div>
-
-        <div class="mb-2">
-            <label class="form-label">Password</label>
-            <input type="password" id="password" th:field="*{password}" class="form-control" placeholder="Create password" required>
-        </div>
-
-        <div class="mb-3 text-end">
-            <span class="toggle-password" onclick="togglePassword()">Show password</span>
-        </div>
-
-        <div class="mb-4">
-            <label class="form-label">Role</label>
-            <select th:field="*{role}" class="form-select" required>
-                <option value="" disabled selected>Select role</option>
-                <option value="CUSTOMER">Customer</option>
-                <option value="SELLER">Seller</option>
-            </select>
-        </div>
-
-        <button type="submit" id="registerBtn" class="btn btn-success w-100 btn-register">
-            Create Account
-        </button>
-    </form>
-
-    <div class="text-center mt-4">
-        <span class="text-muted">Already have an account?</span><br>
-        <a th:href="@{/login}" class="fw-semibold text-decoration-none">Login here</a>
     </div>
 
-</div>
-
-<script>
-    function togglePassword() {
-        const pass = document.getElementById("password");
-        pass.type = pass.type === "password" ? "text" : "password";
-    }
-
-    function showLoading() {
-        const btn = document.getElementById("registerBtn");
-        btn.innerHTML = "Creating account...";
-        btn.disabled = true;
-    }
-</script>
-
+    <script>
+        function togglePassword() {
+            const pass = document.getElementById("password");
+            pass.type = pass.type === "password" ? "text" : "password";
+        }
+        function showLoading() {
+            const btn = document.getElementById("registerBtn");
+            const form = document.querySelector('form');
+            if(form.checkValidity()) {
+                btn.innerHTML = "Creating account...";
+                btn.style.opacity = "0.7";
+            }
+        }
+    </script>
 </body>
 </html>

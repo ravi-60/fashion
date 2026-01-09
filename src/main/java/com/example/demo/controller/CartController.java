@@ -55,25 +55,25 @@ public class CartController {
         return "redirect:/orders";
     }
 
-    // --- API endpoints ---
-
-    @GetMapping("/api/items")
-    @ResponseBody
-    public ResponseEntity<List<CartItem>> getCartItems(@AuthenticationPrincipal CustomUserDetails userDetails) {
-        return ResponseEntity.ok(cartService.getCartItems(userDetails.getUserId()));
-    }
-
-    @PostMapping("/api/add")
-    @ResponseBody
-    public ResponseEntity<Void> apiAddToCart(@RequestParam Long userId, @RequestParam Long variantId, @RequestParam int quantity) {
-        cartService.addToCart(userId, variantId, quantity);
-        return ResponseEntity.ok().build();
-    }
-
-    @DeleteMapping("/api/remove/{cartItemId}")
-    @ResponseBody
-    public ResponseEntity<Void> apiRemoveFromCart(@PathVariable Long cartItemId) {
-        cartService.removeFromCart(cartItemId);
-        return ResponseEntity.ok().build();
-    }
+//    // --- API endpoints ---
+//
+//    @GetMapping("/api/items")
+//    @ResponseBody
+//    public ResponseEntity<List<CartItem>> getCartItems(@AuthenticationPrincipal CustomUserDetails userDetails) {
+//        return ResponseEntity.ok(cartService.getCartItems(userDetails.getUserId()));
+//    }
+//
+//    @PostMapping("/api/add")
+//    @ResponseBody
+//    public ResponseEntity<Void> apiAddToCart(@RequestParam Long userId, @RequestParam Long variantId, @RequestParam int quantity) {
+//        cartService.addToCart(userId, variantId, quantity);
+//        return ResponseEntity.ok().build();
+//    }
+//
+//    @DeleteMapping("/api/remove/{cartItemId}")
+//    @ResponseBody
+//    public ResponseEntity<Void> apiRemoveFromCart(@PathVariable Long cartItemId) {
+//        cartService.removeFromCart(cartItemId);
+//        return ResponseEntity.ok().build();
+//    }
 }

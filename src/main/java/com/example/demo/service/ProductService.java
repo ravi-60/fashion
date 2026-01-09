@@ -112,25 +112,31 @@ public class ProductService {
         return orders;
     }
 
-    public List<OrderInfo> getClosedOrdersForSeller(Long sellerId) {
-        List<OrderInfo> orders = orderRepository.findBySellerIdAndStatusIn(sellerId, List.of(OrderInfo.OrderStatus.DELIVERED, OrderInfo.OrderStatus.CANCELLED));
-        // initialize order items and nested associations for template rendering
-        orders.forEach(o -> {
-            if (o.getOrderItems() != null) {
-                o.getOrderItems().forEach(oi -> {
-                    if (oi.getVariant() != null) {
-                        oi.getVariant().getVariantId();
-                        if (oi.getVariant().getProduct() != null) {
-                            oi.getVariant().getProduct().getProductName();
-                        }
-                    }
-                });
-            }
-        });
-        System.out.println("[DEBUG] getClosedOrdersForSeller: sellerId=" + sellerId + ", orders.size=" + orders.size());
-        return orders;
-    }
     
+    
+    public org.springframework.data.domain.Page<OrderInfo> getClosedOrdersForSellerPaged(
+            Long sellerId, String search, org.springframework.data.domain.Pageable pageable) {
+        
+        java.util.List<OrderInfo.OrderStatus> closedStatuses = java.util.List.of(
+            OrderInfo.OrderStatus.DELIVERED, 
+            OrderInfo.OrderStatus.CANCELLED
+        );
+        
+        org.springframework.data.domain.Page<OrderInfo> orderPage = 
+            orderRepository.findClosedOrdersBySeller(sellerId, closedStatuses, search, pageable);
+        
+        // Pre-initialize lazy collections for the template
+        orderPage.getContent().forEach(o -> {
+            if (o.getCustomer() != null) o.getCustomer().getUsername();
+            o.getOrderItems().forEach(oi -> {
+                if (oi.getVariant() != null && oi.getVariant().getProduct() != null) {
+                    oi.getVariant().getProduct().getProductName();
+                }
+            });
+        });
+        
+        return orderPage;
+    }
     public long getTotalProductsForSeller(Long sellerId) {
         return productRepository.countBySellerId(sellerId);
     }
@@ -147,5 +153,21 @@ public class ProductService {
         return orderRepository.findAverageOrderValueBySeller(sellerId);
     }
 
+    public org.springframework.data.domain.Page<Product> getProductsPaged(
+            String category, String search, org.springframework.data.domain.Pageable pageable) {
+        
+        // Search by name takes priority
+        if (search != null && !search.isEmpty()) {
+            return productRepository.findByProductNameContainingIgnoreCase(search, pageable);
+        }
+        
+        // Filter by category if search is empty
+        if (category != null && !category.isEmpty()) {
+            return productRepository.findByCategory(category, pageable);
+        }
+        
+        // Default view (All products)
+        return productRepository.findAll(pageable);
+    }
 
 }

@@ -3,10 +3,10 @@ package com.example.demo.config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -16,35 +16,42 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
 	@Autowired
-	private org.springframework.security.core.userdetails.UserDetailsService userDetailsService;
+	private UserDetailsService userDetailsService;
+	
+	//private DaoAuthenticationProvider dao;
 
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-		http.authorizeHttpRequests(
-				auth -> auth.requestMatchers("/register", "/login", "/css/**", "/js/**", "/api/debug/**").permitAll()
-						.requestMatchers("/admin/**").hasRole("ADMIN").requestMatchers("/seller/**").hasRole("SELLER")
-						.anyRequest().authenticated())
+		http.authorizeHttpRequests(auth -> auth
+				.requestMatchers("/", "/register", "/login", "/css/**", "/js/**", "/api/debug/**", "/images/**")
+				.permitAll().requestMatchers("/admin/**").hasRole("ADMIN").requestMatchers("/seller/**")
+				.hasRole("SELLER").anyRequest().authenticated())
 
-				.csrf(csrf -> csrf.requireCsrfProtectionMatcher(
-						request -> "POST".equals(request.getMethod()) && "/login".equals(request.getRequestURI())))
 
-				.formLogin(form -> form.loginPage("/login").loginProcessingUrl("/login")
-						.successHandler((request, response, authentication) -> {
-							CustomUserDetails user = (CustomUserDetails) authentication.getPrincipal();
-							String role = user.getRole().name();
-							String context = request.getContextPath();
-							if (role.equals("ADMIN")) {
-								response.sendRedirect(context + "/admin/dashboard");
-							} else if (role.equals("SELLER")) {
-								response.sendRedirect(context + "/seller/dashboard");
-							} else {
-								response.sendRedirect(context + "/products");
-							}
-						}).permitAll())
-				
-				.logout(logout -> logout.logoutUrl("/logout")
-						.logoutRequestMatcher(request -> "GET".equals(request.getMethod())
-								&& "/logout".equals(request.getRequestURI()))
+				.csrf(csrf -> csrf.requireCsrfProtectionMatcher(request -> {
+					String path = request.getRequestURI();
+					return "POST".equals(request.getMethod())
+							&& (path.equals("/login") || path.equals("/admin/users/add-admin"));
+				})).exceptionHandling(
+						exception -> exception.accessDeniedHandler((request, response, accessDeniedException) -> {
+							response.setStatus(403);
+							response.getWriter().write("CSRF Access Denied: Missing or Invalid Token");
+						}))
+		
+//		.csrf(c -> c.disable())
+				.formLogin(form -> form.loginPage("/login").successHandler((request, response, authentication) -> {
+					CustomUserDetails user = (CustomUserDetails) authentication.getPrincipal();
+					String role = user.getRole().name();
+					if (role.equals("ADMIN")) {
+						response.sendRedirect("/admin/dashboard");
+					} else if (role.equals("SELLER")) {
+						response.sendRedirect("/seller/dashboard");
+					} else {
+						response.sendRedirect("/products");
+					}
+				}).permitAll())
+				.logout(logout -> logout.logoutUrl("/logout").logoutRequestMatcher(
+						request -> "GET".equals(request.getMethod()) && "/logout".equals(request.getRequestURI()))
 						.logoutSuccessUrl("/login?logout").permitAll());
 		return http.build();
 	}
@@ -54,8 +61,5 @@ public class SecurityConfig {
 		return new BCryptPasswordEncoder();
 	}
 
-	@Bean
-	public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
-		return authConfig.getAuthenticationManager();
-	}
+
 }

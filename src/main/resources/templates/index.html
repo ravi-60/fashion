@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+ 
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GENCFashion | Elevate Your Style</title>
+ 
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500&display=swap%22" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+ 
+    <style>
+        /* CSS Override to remove the shadow from the primary button */
+        .btn-primary {
+            box-shadow: none !important;
+            border-bottom: none !important;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+        }
+ 
+        .btn-primary:hover {
+            box-shadow: none !important;
+            transform: none !important; /* Prevents the button from 'lifting' which often reveals shadows */
+            filter: brightness(0.9); /* Subtle feedback for hover without using shadows */
+        }
+        
+        /* Ensuring section titles have consistent spacing */
+        .section-title {
+            padding: 20px;
+            text-align: center;
+            font-family: 'Playfair Display', serif;
+        }
+    </style>
+</head>
+ 
+<body>
+ 
+<nav class="navbar">
+    <div class="nav-container">
+        <a th:href="@{/}" class="logo">Genc<span class="highlight">Fashion</span></a>
+ 
+        <ul class="nav-links">
+            <li><a th:href="@{/products}">Shop</a></li>
+            <li><a href="#categories">Categories</a></li>
+            <li><a href="#new-arrivals">New Arrivals</a></li>
+            <li><a href="#about">About</a></li>
+        </ul>
+ 
+        <div class="nav-actions">
+            <a sec:authorize="!isAuthenticated()" th:href="@{/login}" class="btn btn-outline">Login</a>
+            <a sec:authorize="!isAuthenticated()" th:href="@{/register}" class="btn btn-primary">Sign Up</a>
+            <a sec:authorize="isAuthenticated()" th:href="@{/logout}" class="btn btn-outline">Logout</a>
+        </div>
+    </div>
+</nav>
+ 
+<section class="hero">
+    <div class="hero-content">
+        <h1>Elevate Your <span class="highlight">Style</span></h1>
+        <p>Discover curated fashion for men, women & kids.</p>
+ 
+        <div class="hero-buttons">
+            <a th:href="@{/products}" class="btn btn-primary btn-large">Shop Now</a>
+            <a href="#categories" class="btn btn-outline btn-large">Explore</a>
+        </div>
+    </div>
+ 
+    <div class="hero-image">
+        <img th:src="@{/images/hero/hero-model.jpg}" class="hero-img" alt="Fashion Model">
+    </div>
+</section>
+ 
+<section class="features-section">
+    <div class="features-container">
+        <div class="feature-card">
+            <div class="feature-icon"><i class="fa-solid fa-truck-fast"></i></div>
+            <div class="feature-info">
+                <h4>Free Shipping</h4>
+                <p>On all orders over ₹999</p>
+            </div>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon"><i class="fa-solid fa-arrow-rotate-left"></i></div>
+            <div class="feature-info">
+                <h4>Easy Returns</h4>
+                <p>30-day hassle-free return policy</p>
+            </div>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon"><i class="fa-solid fa-shield-halved"></i></div>
+            <div class="feature-info">
+                <h4>Secure Payment</h4>
+                <p>100% protected checkout</p>
+            </div>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon"><i class="fa-solid fa-headset"></i></div>
+            <div class="feature-info">
+                <h4>24/7 Support</h4>
+                <p>Dedicated customer assistance</p>
+            </div>
+        </div>
+    </div>
+</section>
+ 
+<section id="categories" class="categories">
+    <h2 class="section-title">Shop by Category</h2>
+ 
+    <div class="category-grid">
+        <a th:href="@{/products?category=Men}"
+           class="category-card men"
+           style="background-image: url('/images/categories/men.jpg');">
+            <div class="category-overlay">
+                <h3>Men</h3>
+                <span>Explore →</span>
+            </div>
+        </a>
+ 
+        <a th:href="@{/products?category=Women}"
+           class="category-card women"
+           style="background-image: url('/images/categories/women.jpg');">
+            <div class="category-overlay">
+                <h3>Women</h3>
+                <span>Explore →</span>
+            </div>
+        </a>
+ 
+        <a th:href="@{/products?category=Kids}"
+           class="category-card kids"
+           style="background-image: url('/images/categories/kids.jpg');">
+            <div class="category-overlay">
+                <h3>Kids</h3>
+                <span>Explore →</span>
+            </div>
+        </a>
+    </div>
+</section>
+ 
+<section id="new-arrivals" class="products">
+    <h2 class="section-title">New Arrivals</h2>
+ 
+    <div class="product-grid">
+        <div class="product-card">
+            <div class="product-image">
+                <img src="/images/products/p1.jpg" class="product-img" alt="Classic Jacket">
+            </div>
+            <div class="product-info">
+                <h3>Classic Jacket</h3>
+                <p class="product-price">₹1999</p>
+            </div>
+        </div>
+ 
+        <div class="product-card">
+            <div class="product-image">
+                <img src="/images/products/p2.jpg" class="product-img" alt="Summer Dress">
+            </div>
+            <div class="product-info">
+                <h3>Summer Dress</h3>
+                <p class="product-price">₹2499</p>
+            </div>
+        </div>
+ 
+        <div class="product-card">
+            <div class="product-image">
+                <img src="/images/products/p3.jpg" class="product-img" alt="Casual Shirt">
+            </div>
+            <div class="product-info">
+                <h3>Casual Shirt</h3>
+                <p class="product-price">₹1499</p>
+            </div>
+        </div>
+ 
+        <div class="product-card">
+            <div class="product-image">
+                <img src="/images/products/p4.jpg" class="product-img" alt="Kids Wear">
+            </div>
+            <div class="product-info">
+                <h3>Kids Wear</h3>
+                <p class="product-price">₹999</p>
+            </div>
+        </div>
+    </div>
+</section>
+ 
+<section id="about" class="about">
+    <div class="about-container">
+        <div class="about-text">
+            <h2>About GencFashion</h2>
+            <p>
+                GencFashion is a modern fashion destination designed for those who value style, comfort, and quality.
+                We curate premium collections for men, women, and kids — blending contemporary trends with timeless elegance.
+            </p>
+            <p>
+                From everyday essentials to statement pieces, our mission is to make fashion accessible, inspiring,
+                and effortless.
+            </p>
+ 
+            <div class="about-features">
+                <span>✔ Premium Quality</span>
+                <span>✔ Trend-Driven Collections</span>
+                <span>✔ Trusted by Thousands</span>
+                <span>✔ Pan-India Delivery</span>
+            </div>
+        </div>
+ 
+        <div class="about-card">
+            <h3>Why Choose GencFashion?</h3>
+            <p>
+                Secure payments, fast delivery, easy returns, and dedicated support —
+                we ensure a seamless shopping experience you can trust.
+            </p>
+        </div>
+    </div>
+</section>
+ 
+<footer class="footer">
+    <div class="footer-container">
+        <div class="footer-grid">
+            <div class="footer-col-about">
+                <div class="footer-logo">
+                    <a href="#">Genc fashion<span>.</span></a>
+                </div>
+                <p>The customer is at the heart of our unique business model, which includes design.</p>
+                <div class="footer-payments">
+                    <img src="https://img.icons8.com/color/32/000000/bitcoin.png" alt="Bitcoin">
+                    <img src="https://img.icons8.com/color/32/000000/amex.png" alt="Amex">
+                    <img src="https://img.icons8.com/color/32/000000/paypal.png" alt="Paypal">
+                    <img src="https://img.icons8.com/color/32/000000/mastercard.png" alt="Mastercard">
+                    <img src="https://img.icons8.com/color/32/000000/visa.png" alt="Visa">
+                </div>
+            </div>
+ 
+            <div class="footer-widget">
+                <h6>SHOPPING</h6>
+                <ul>
+                    <li><a href="#">Clothing Store</a></li>
+                    <li><a href="#">Trending Shoes</a></li>
+                    <li><a href="#">Accessories</a></li>
+                    <li><a href="#">Sale</a></li>
+                </ul>
+            </div>
+ 
+            <div class="footer-widget">
+                <h6>CONTACT US</h6>
+                <ul class="contact-list">
+                    <li>
+                        <i class="fa-solid fa-envelope"></i>
+                        <span>support@gencfashion.com</span>
+                    </li>
+                    <li>
+                        <i class="fa-solid fa-phone"></i>
+                        <span>+1 234 567 890</span>
+                    </li>
+                    <li>
+                        <i class="fa-solid fa-location-dot"></i>
+                        <span>GAR Infobahn, Tower 5, HYD 500070</span>
+                    </li>
+                </ul>
+            </div>
+ 
+            <div class="footer-widget">
+                <h6>QUICK LINKS</h6>
+                <ul class="quick-links">
+                    <li><a th:href="@{/products}">Shop Now</a></li>
+                    <li><a href="#categories">Our Categories</a></li>
+                    <li><a href="#new-arrivals">New Arrivals</a></li>
+                    <li><a href="#about">About Us</a></li>
+                    <li><a href="#">Privacy Policy</a></li>
+                </ul>
+            </div>
+        </div>
+ 
+        <div class="footer-copyright">
+            <p>Copyright © 2026 All rights reserved</p>
+        </div>
+    </div>
+</footer>
+ 
+</body>
+</html>

@@ -2,37 +2,56 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Seller | Manage Orders</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
 
     <style>
+        :root {
+            --sidebar-dark: #1a1a2e;
+            --sidebar-gradient: linear-gradient(180deg, #1a1a2e, #222255);
+            --accent-crimson: #e94560;
+            --accent-hover: #c62d48;
+            --bg-light: #f8fafc;
+        }
+
         body {
-            background-color: #f1f5f9;
-            font-family: 'Segoe UI', sans-serif;
+            background-color: var(--bg-light);
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            height: 100vh;
+            overflow: hidden;
         }
 
         .dashboard-wrapper {
             display: flex;
-            min-height: 100vh;
+            height: 100vh;
+            width: 100%;
         }
 
-        /* Sidebar */
+        /* --- SIDEBAR --- */
         .sidebar {
-            width: 270px;
-            background: linear-gradient(180deg, #1e40af, #1e3a8a);
+            width: 260px;
+            background: var(--sidebar-gradient);
             color: white;
-            padding: 25px 20px;
+            padding: 26px 22px;
             display: flex;
             flex-direction: column;
+            flex-shrink: 0;
         }
 
         .sidebar h4 {
+            font-family: 'Playfair Display', serif;
             font-weight: 700;
+            font-size: 1.5rem;
             margin-bottom: 35px;
-            letter-spacing: 1px;
         }
+
+        .sidebar h4 span { color: var(--accent-crimson); }
 
         .sidebar a {
             display: flex;
@@ -42,13 +61,13 @@
             color: #e5e7eb;
             text-decoration: none;
             border-radius: 10px;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             font-size: 0.95rem;
+            transition: 0.3s;
         }
 
-        .sidebar a:hover,
-        .sidebar a.active {
-            background-color: rgba(255,255,255,0.18);
+        .sidebar a:hover, .sidebar a.active {
+            background-color: rgba(233, 69, 96, 0.2);
             color: white;
         }
 
@@ -57,47 +76,114 @@
             color: #fecaca;
         }
 
-        /* Content */
-        .content {
+        /* --- MAIN CONTENT --- */
+        .main-area {
             flex-grow: 1;
-            padding: 30px 35px;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .content {
+            padding: 35px 40px;
         }
 
         .page-header h3 {
+            font-family: 'Playfair Display', serif;
             font-weight: 700;
+            color: #1e293b;
+        }
+
+        /* --- CONTROLS --- */
+        .btn-crimson {
+            background-color: var(--accent-crimson);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: 0.2s;
+        }
+
+        .btn-crimson:hover {
+            background-color: var(--accent-hover);
+            color: white;
+        }
+
+        .search-container {
+            display: flex;
+            gap: 10px;
+            max-width: 500px;
+        }
+
+        .back-arrow {
+            font-size: 1.4rem;
+            color: #64748b;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .back-arrow:hover { color: var(--accent-crimson); }
+
+        /* --- TABLE STYLING --- */
+        .table-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
         }
 
         .table thead {
-            background-color: #e2e8f0;
+            background-color: #f1f5f9;
         }
 
-        /* 🔹 Improved Items UI */
-        .order-items {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
+        .table th {
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+            color: #475569;
+            padding: 15px;
         }
 
-        .order-item {
-            background-color: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 6px;
-            padding: 6px 10px;
+        /* Column widths for stability */
+        .col-id { width: 10%; }
+        .col-cust { width: 15%; }
+        .col-items { width: 30%; }
+        .col-status { width: 12%; }
+        .col-total { width: 13%; }
+        .col-actions { width: 20%; }
+
+        .item-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
             font-size: 0.85rem;
         }
 
-        .order-item .name {
-            font-weight: 600;
+        .item-list li {
+            padding: 2px 0;
+            border-bottom: 1px solid #f1f5f9;
         }
 
-        .order-item .meta {
-            color: #64748b;
-            font-size: 0.8rem;
+        .item-list li:last-child { border: none; }
+
+        .badge-pill {
+            padding: 0.4em 0.8em;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.7rem;
         }
 
-        .order-item .price {
-            font-weight: 600;
-            color: #0f172a;
+        .footer {
+            background: #0f172a;
+            color: #94a3b8;
+            text-align: center;
+            padding: 1rem 0;
+            font-size: 0.85rem;
+            margin-top: auto;
         }
     </style>
 </head>
@@ -105,182 +191,143 @@
 <body>
 
 <div class="dashboard-wrapper">
-
-    <!-- SIDEBAR -->
     <div class="sidebar">
-        <h4>Fashion Store</h4>
-
-        <a href="/seller/dashboard">
-            <i class="bi bi-speedometer2"></i> Dashboard
-        </a>
-
-        <a href="/seller/products">
-            <i class="bi bi-box-seam"></i> My Products
-        </a>
-
-        <a href="/seller/manage-orders" class="active">
-            <i class="bi bi-bag-check"></i> Orders
-        </a>
-
-        <a href="/seller/profile">
-            <i class="bi bi-person-circle"></i> Profile
-        </a>
-
-        <a href="/logout" class="logout">
-            <i class="bi bi-box-arrow-right"></i> Logout
-        </a>
+        <h4>Genc<span>Fashion</span></h4>
+        <a href="/seller/dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a>
+        <a href="/seller/products"><i class="bi bi-box-seam"></i> My Products</a>
+        <a href="/seller/manage-orders" class="active"><i class="bi bi-bag-check"></i> Orders</a>
+        <a href="/seller/profile"><i class="bi bi-person-circle"></i> Profile</a>
+        <a href="/logout" class="logout"><i class="bi bi-box-arrow-right"></i> Logout</a>
     </div>
 
-    <!-- CONTENT -->
-    <div class="content">
-
-        <!-- HEADER -->
-        <div class="page-header mb-4">
-            <h3>Manage Orders</h3>
-            <p class="text-muted">
-                Orders placed for your products. You can cancel or mark them as delivered.
-            </p>
-        </div>
-
-        <!-- ACTION BUTTONS -->
-        <div class="row mb-4">
-            <div class="col-md-3">
-                <a href="/seller/manage-orders" class="btn btn-primary w-100">
-                    Active Orders
-                </a>
+    <div class="main-area">
+        <div class="content">
+            <div class="page-header mb-4">
+                <h3>Manage Orders</h3>
+                <p class="text-muted">Process your active customer orders below.</p>
             </div>
-            <div class="col-md-3">
-                <a href="/seller/all-orders" class="btn btn-outline-primary w-100">
-                    All Orders
-                </a>
+
+            <div class="row mb-4 align-items-center">
+                <div class="col-md-5 d-flex gap-2">
+                    <a href="/seller/manage-orders" class="btn btn-crimson">Active Orders</a>
+                    <a href="/seller/all-orders" class="btn btn-outline-dark">Order History</a>
+                </div>
+                <div class="col-md-7">
+                    <form action="/seller/manage-orders" method="get" class="search-container ms-auto">
+                        <a th:if="${search != null and search != ''}" href="/seller/manage-orders" class="back-arrow" title="Clear Search">
+                            <i class="bi bi-arrow-left-circle-fill"></i>
+                        </a>
+                        <input type="text" name="search" th:value="${search}" class="form-control" placeholder="Search Order ID...">
+                        <button type="submit" class="btn btn-dark px-4">Search</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="table-card">
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th class="col-id text-center">Order ID</th>
+                                <th class="col-cust">Customer</th>
+                                <th class="col-items">Products & Details</th>
+                                <th class="col-status text-center">Status</th>
+                                <th class="col-total text-center">Total Amount</th>
+                                <th class="col-actions text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="order : ${orders}">
+                                <td class="text-center fw-bold text-primary" th:text="'#' + ${order.orderId}"></td>
+                                <td>
+                                    <div class="fw-semibold" th:text="${order.customer.username}"></div>
+                                    <small class="text-muted" th:text="${order.orderDate}"></small>
+                                </td>
+                                <td>
+                                    <ul class="item-list">
+                                        <li th:each="it : ${order.orderItems}">
+                                            <span class="fw-medium" th:text="${it.variant.product.productName}"></span>
+                                            <span class="text-muted" th:text="'(' + ${it.variant.size} + '/' + ${it.variant.color} + ') x' + ${it.quantity}"></span>
+                                        </li>
+                                    </ul>
+                                </td>
+                                <td class="text-center">
+                                    <span th:text="${order.status}"
+                                          th:class="'badge badge-pill ' + 
+                                          (${order.status} == 'DELIVERED' ? 'bg-success' : 
+                                          (${order.status} == 'CANCELLED' ? 'bg-danger' : 'bg-primary'))">
+                                    </span>
+                                </td>
+                                <td class="text-center fw-bold text-dark">₹<span th:text="${order.totalAmount}"></span></td>
+                                <td class="text-center">
+                                    <div class="btn-group gap-2">
+                                        <button class="btn btn-sm btn-outline-danger cancel-btn" th:data-id="${order.orderId}">
+                                            Cancel
+                                        </button>
+                                        <button class="btn btn-sm btn-success complete-btn" th:data-id="${order.orderId}">
+                                            Delivered
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <tr th:if="${orders.empty}">
+                                <td colspan="6" class="text-center py-5 text-muted">
+                                    <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                                    No active orders found.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
-        <!-- SEARCH -->
-        <div class="row mb-3">
-            <div class="col-md-6">
-                <form action="/seller/manage-orders" method="get" class="d-flex">
-                    <input type="text" name="search" class="form-control me-2"
-                           placeholder="Search by Order ID"
-                           th:value="${search}" />
-                    <button type="submit" class="btn btn-outline-secondary">
-                        Search
-                    </button>
-                </form>
-            </div>
-        </div>
-
-        <!-- EMPTY STATE -->
-        <div th:if="${orders.empty}" class="alert alert-info">
-            No orders found for your products.
-        </div>
-
-        <!-- ORDERS TABLE -->
-        <div th:unless="${orders.empty}" class="table-responsive">
-            <table class="table table-bordered align-middle">
-                <thead>
-                <tr>
-                    <th>Order ID</th>
-                    <th>Customer</th>
-                    <th>Date</th>
-                    <th>Items</th>
-                    <th>Status</th>
-                    <th>Total Amount</th>
-                    <th style="width:220px;">Actions</th>
-                </tr>
-                </thead>
-
-                <tbody>
-                <tr th:each="order : ${orders}">
-                    <td th:text="${order.orderId}"></td>
-                    <td th:text="${order.customer.username}"></td>
-                    <td th:text="${order.orderDate}"></td>
-
-                    <!-- ✅ IMPROVED ITEMS COLUMN -->
-                    <td>
-                        <div class="order-items">
-                            <div class="order-item" th:each="it : ${order.orderItems}">
-                                <div class="name"
-                                     th:text="${it.variant.product.productName}">
-                                </div>
-
-                                <div class="meta">
-                                    Size:
-                                    <span th:text="${it.variant.size}"></span>
-                                    /
-                                    <span th:text="${it.variant.color}"></span>
-                                    • Qty:
-                                    <span th:text="${it.quantity}"></span>
-                                </div>
-
-                                <div class="price">
-                                    ₹<span th:text="${it.unitPrice}"></span>
-                                </div>
-                            </div>
-                        </div>
-                    </td>
-
-                    <td>
-                        <span th:text="${order.status}"
-                              th:class="'badge ' +
-                              (${order.status} == 'DELIVERED' ? 'bg-success' :
-                              (${order.status} == 'CANCELLED' ? 'bg-danger' : 'bg-primary'))">
-                        </span>
-                    </td>
-
-                    <td th:text="${order.totalAmount}"></td>
-
-                    <td>
-                        <button class="btn btn-danger btn-sm cancel-btn"
-                                th:data-id="${order.orderId}">
-                            Cancel
-                        </button>
-                        <button class="btn btn-success btn-sm complete-btn"
-                                th:data-id="${order.orderId}">
-                            Completed
-                        </button>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
-
+        <footer class="footer">
+            &copy; 2026 GencFashion Seller Portal. All rights reserved.
+        </footer>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
 <script>
-    function fadeOutRow(row) {
-        row.style.transition = 'opacity 0.5s';
-        row.style.opacity = 0;
-        setTimeout(function () {
+    // Smooth fade and slide out
+    function removeRow(btn) {
+        const row = btn.closest('tr');
+        row.style.transition = 'all 0.45s ease';
+        row.style.opacity = '0';
+        row.style.transform = 'translateX(30px)';
+        setTimeout(() => {
             row.remove();
-        }, 500);
+            // Optional: If no rows left, reload to show empty state
+            if (document.querySelectorAll('tbody tr').length === 0) {
+                location.reload();
+            }
+        }, 450);
     }
 
-    document.querySelectorAll('.cancel-btn').forEach(function (btn) {
-        btn.addEventListener('click', function (e) {
-            e.preventDefault();
-            const orderId = btn.getAttribute('data-id');
-            fetch('/seller/orders/cancel/' + orderId, { method: 'POST' })
-                .then(resp => {
-                    if (resp.ok) {
-                        fadeOutRow(btn.closest('tr'));
-                    }
-                });
+    // Cancel Button Handler
+    document.querySelectorAll('.cancel-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            if(confirm("Are you sure you want to cancel this order? This action cannot be undone.")) {
+                const id = this.getAttribute('data-id');
+                fetch('/seller/orders/cancel/' + id, { method: 'POST' })
+                    .then(res => {
+                        if(res.ok) removeRow(this);
+                        else alert("Error updating order status.");
+                    });
+            }
         });
     });
 
-    document.querySelectorAll('.complete-btn').forEach(function (btn) {
-        btn.addEventListener('click', function (e) {
-            e.preventDefault();
-            const orderId = btn.getAttribute('data-id');
-            fetch('/seller/orders/delivered/' + orderId, { method: 'POST' })
-                .then(resp => {
-                    if (resp.ok) {
-                        fadeOutRow(btn.closest('tr'));
-                    }
+    // Delivered Button Handler
+    document.querySelectorAll('.complete-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const id = this.getAttribute('data-id');
+            fetch('/seller/orders/delivered/' + id, { method: 'POST' })
+                .then(res => {
+                    if(res.ok) removeRow(this);
+                    else alert("Error updating order status.");
                 });
         });
     });

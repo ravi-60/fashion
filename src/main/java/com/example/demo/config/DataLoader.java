@@ -38,46 +38,6 @@ public class DataLoader {
                 userRepository.save(user);
             }
 
-            if (productRepository.count() == 0) {
-                // Product 1
-                Product p1 = new Product();
-                p1.setProductName("Classic T-Shirt");
-                p1.setDescription("Cotton casual t-shirt");
-                p1.setPrice(new BigDecimal("29.99"));
-                p1.setCategory("Men");
-                p1.setStatus(Product.Status.AVAILABLE);
-                productRepository.save(p1);
-
-                Variant v1 = new Variant();
-                v1.setProduct(p1);
-                v1.setSize(Variant.Size.M);
-                v1.setColor("Blue");
-                v1.setStockQuantity(50);
-                variantRepository.save(v1);
-
-                Variant v2 = new Variant();
-                v2.setProduct(p1);
-                v2.setSize(Variant.Size.L);
-                v2.setColor("Black");
-                v2.setStockQuantity(30);
-                variantRepository.save(v2);
-
-                // Product 2
-                Product p2 = new Product();
-                p2.setProductName("Summer Dress");
-                p2.setDescription("Floral print summer dress");
-                p2.setPrice(new BigDecimal("49.99"));
-                p2.setCategory("Women");
-                p2.setStatus(Product.Status.AVAILABLE);
-                productRepository.save(p2);
-
-                Variant v3 = new Variant();
-                v3.setProduct(p2);
-                v3.setSize(Variant.Size.S);
-                v3.setColor("Red");
-                v3.setStockQuantity(20);
-                variantRepository.save(v3);
-            }
         };
     }
 }
