@@ -31,6 +31,10 @@ public class AuthService {
 		if (userRepository.findFirstByEmail(dto.getEmail()).isPresent()) {
 			throw new IllegalArgumentException("Email '" + dto.getEmail() + "' is already taken.");
 		}
+		
+		if (dto.getRole().name().equals("ADMIN")) {
+			throw new IllegalArgumentException("You can't create a ADMIN");
+		}
 
 		User user = new User();
 		user.setUsername(dto.getUsername());

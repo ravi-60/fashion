@@ -2,235 +2,243 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
 <head>
-    <title>Product Details | GencFashion</title>
+<title>Product Details | GencFashion</title>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+	rel="stylesheet">
+<link
+	href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&display=swap"
+	rel="stylesheet">
+<link rel="stylesheet"
+	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-    <style>
-        body {
-            background-color: #f8fafc;
-            font-family: 'Inter', sans-serif;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
+<style>
+body {
+	background-color: #f8fafc;
+	font-family: 'Inter', sans-serif;
+	margin: 0;
+	display: flex;
+	flex-direction: column;
+	min-height: 100vh;
+}
 
-        /* ================= NAVBAR ================= */
-        .navbar {
-            background: #ffffff;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-            padding: 15px 0;
-        }
+/* ================= NAVBAR ================= */
+.navbar {
+	background: #ffffff;
+	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+	padding: 15px 0;
+}
 
-        .navbar-brand {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.8rem;
-            font-weight: 700;
-            text-decoration: none;
-            color: #1a1a2e;
-        }
+.navbar-brand {
+	font-family: 'Playfair Display', serif;
+	font-size: 1.8rem;
+	font-weight: 700;
+	text-decoration: none;
+	color: #1a1a2e;
+}
 
-        .navbar-brand span {
-            color: #e94560;
-        }
+.navbar-brand span {
+	color: #e94560;
+}
 
-        /* ================= CONTENT ALIGNMENT ================= */
-        .page-wrapper {
-            flex: 1 0 auto;
-            padding-top: 120px;
-            padding-bottom: 60px;
-        }
+/* ================= CONTENT ALIGNMENT ================= */
+.page-wrapper {
+	flex: 1 0 auto;
+	padding-top: 120px;
+	padding-bottom: 60px;
+}
 
-        .btn-back {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            color: #64748b;
-            text-decoration: none;
-            font-weight: 500;
-            padding: 8px 0;
-            transition: 0.2s;
-            border: none;
-            background: none;
-        }
+.btn-back {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	color: #64748b;
+	text-decoration: none;
+	font-weight: 500;
+	padding: 8px 0;
+	transition: 0.2s;
+	border: none;
+	background: none;
+}
 
-        .btn-back:hover {
-            color: #e94560;
-        }
+.btn-back:hover {
+	color: #e94560;
+}
 
-        .product-img {
-            width: 100%;
-            height: 550px;
-            object-fit: contain;
-            background: #fff;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-        }
+.product-img {
+	width: 100%;
+	height: 550px;
+	object-fit: contain;
+	background: #fff;
+	border-radius: 12px;
+	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
 
-        .price {
-            font-size: 2.2rem;
-            font-weight: 700;
-            color: #1a1a2e;
-            margin-bottom: 20px;
-        }
+.price {
+	font-size: 2.2rem;
+	font-weight: 700;
+	color: #1a1a2e;
+	margin-bottom: 20px;
+}
 
-        .product-description {
-            font-size: 1.05rem;
-            line-height: 1.6;
-            color: #64748b;
-            margin-bottom: 30px;
-        }
+.product-description {
+	font-size: 1.05rem;
+	line-height: 1.6;
+	color: #64748b;
+	margin-bottom: 30px;
+}
 
-        .variant-box {
-            background: #ffffff;
-            padding: 30px;
-            border-radius: 12px;
-            border: 1px solid #e2e8f0;
-        }
+.variant-box {
+	background: #ffffff;
+	padding: 30px;
+	border-radius: 12px;
+	border: 1px solid #e2e8f0;
+}
 
-        .stock-text {
-            font-size: 0.9rem;
-            font-weight: 600;
-            margin-top: 5px;
-        }
+.stock-text {
+	font-size: 0.9rem;
+	font-weight: 600;
+	margin-top: 5px;
+}
 
-        /* ================= FOOTER ================= */
-        .footer {
-            background: #0f172a;
-            color: #e5e7eb;
-            text-align: center;
-            padding: 20px 0;
-            font-size: 0.9rem;
-            width: 100%;
-            flex-shrink: 0;
-        }
-    </style>
+/* ================= FOOTER ================= */
+.footer {
+	background: #0f172a;
+	color: #e5e7eb;
+	text-align: center;
+	padding: 20px 0;
+	font-size: 0.9rem;
+	width: 100%;
+	flex-shrink: 0;
+}
+</style>
 </head>
 
 <body>
 
-<nav class="navbar navbar-expand-lg fixed-top">
-    <div class="container">
-        <a class="navbar-brand" th:href="@{/products}">
-            Genc<span>Fashion</span>
-        </a>
+	<nav class="navbar navbar-expand-lg fixed-top">
+		<div class="container">
+			<a class="navbar-brand" th:href="@{/products}"> Genc<span>Fashion</span>
+			</a>
 
-        <div class="ms-auto d-flex align-items-center gap-4">
-            <a th:href="@{/cart}" class="text-dark text-decoration-none fw-medium">
-                <i class="fa-solid fa-cart-shopping me-1"></i> Cart
-            </a>
-            <a th:href="@{/orders}" class="text-dark text-decoration-none fw-medium">
-                <i class="fa-solid fa-box me-1"></i> My Orders
-            </a>
-            <a th:href="@{/logout}" class="text-danger text-decoration-none fw-medium">
-                Logout
-            </a>
-        </div>
-    </div>
-</nav>
+			<div class="ms-auto d-flex align-items-center gap-4">
+				<a th:href="@{/cart}"
+					class="text-dark text-decoration-none fw-medium"> <i
+					class="fa-solid fa-cart-shopping me-1"></i> Cart
+				</a> <a th:href="@{/orders}"
+					class="text-dark text-decoration-none fw-medium"> <i
+					class="fa-solid fa-box me-1"></i> My Orders
+				</a> <a th:href="@{/logout}"
+					class="text-danger text-decoration-none fw-medium"> Logout </a>
+			</div>
+		</div>
+	</nav>
 
-<div class="container page-wrapper">
+	<div class="container page-wrapper">
 
-    <div class="row mb-4">
-        <div class="col-12">
-            <a th:href="@{/products}" class="btn-back">
-                <i class="fa-solid fa-arrow-left"></i> Back to Products
-            </a>
-        </div>
-    </div>
+		<div class="row mb-4">
+			<div class="col-12">
+				<a th:href="@{/products}" class="btn-back"> <i
+					class="fa-solid fa-arrow-left"></i> Back to Products
+				</a>
+			</div>
+		</div>
 
-    <div class="row g-5" th:if="${product}">
+		<div class="row g-5" th:if="${product}">
 
-        <div class="col-lg-6">
-            <img th:src="@{${product.imgPath != null ? product.imgPath : 'https://via.placeholder.com/600x800'}}" 
-                 class="product-img" alt="Product Image">
-        </div>
+			<div class="col-lg-6">
+				<img
+					th:src="@{${product.imgPath != null ? product.imgPath : 'https://via.placeholder.com/600x800'}}"
+					class="product-img" alt="Product Image">
+			</div>
 
-        <div class="col-lg-6">
-            <nav aria-label="breadcrumb" class="mb-2">
-                <ol class="breadcrumb mb-0">
-                    <li class="breadcrumb-item"><a th:href="@{/products}" class="text-decoration-none text-muted">Collection</a></li>
-                    <li class="breadcrumb-item active text-capitalize" th:text="${product.category}">Category</li>
-                </ol>
-            </nav>
+			<div class="col-lg-6">
+				<nav aria-label="breadcrumb" class="mb-2">
+					<ol class="breadcrumb mb-0">
+						<li class="breadcrumb-item"><a th:href="@{/products}"
+							class="text-decoration-none text-muted">Collection</a></li>
+						<li class="breadcrumb-item active text-capitalize"
+							th:text="${product.category}">Category</li>
+					</ol>
+				</nav>
 
-            <h1 class="display-6 fw-bold mb-2" th:text="${product.productName}">Product Name</h1>
-            
-            <div class="price">
-                ₹<span th:text="${product.price}">0.00</span>
-            </div>
+				<h1 class="display-6 fw-bold mb-2" th:text="${product.productName}">Product
+					Name</h1>
 
-            <p class="product-description" th:text="${product.description}">
-                Premium quality fabric designed for comfort and style. Perfect for any occasion.
-            </p>
+				<div class="price">
+					₹<span th:text="${product.price}">0.00</span>
+				</div>
 
-            <div class="variant-box shadow-sm">
-                <form th:action="@{/cart/add}" method="post">
-                    <input type="hidden" name="variantId" id="variantId" required>
+				<p class="product-description" th:text="${product.description}">
+					Premium quality fabric designed for comfort and style. Perfect for
+					any occasion.</p>
 
-                    <div class="row g-3">
-                        <div class="col-sm-6">
-                            <label class="form-label fw-semibold">Size</label>
-                            <select id="sizeSelect" class="form-select" onchange="onSizeChange()" required>
-                                <option value="">Select size</option>
-                            </select>
-                        </div>
+				<div class="variant-box shadow-sm">
+					<form th:action="@{/cart/add}" method="post">
+						<input type="hidden" name="variantId" id="variantId" required>
 
-                        <div class="col-sm-6">
-                            <label class="form-label fw-semibold">Color</label>
-                            <select id="colorSelect" class="form-select" onchange="onColorChange()" required disabled>
-                                <option value="">Select color</option>
-                            </select>
-                        </div>
-                    </div>
+						<div class="row g-3">
+							<div class="col-sm-6">
+								<label class="form-label fw-semibold">Size</label> <select
+									id="sizeSelect" class="form-select" onchange="onSizeChange()"
+									required>
+									<option value="">Select size</option>
+								</select>
+							</div>
 
-                    <div id="stockText" class="stock-text mb-4 mt-2"></div>
+							<div class="col-sm-6">
+								<label class="form-label fw-semibold">Color</label> <select
+									id="colorSelect" class="form-select" onchange="onColorChange()"
+									required disabled>
+									<option value="">Select color</option>
+								</select>
+							</div>
+						</div>
 
-                    <div class="d-flex align-items-end gap-3 mb-4">
-                        <div style="width: 100px;">
-                            <label class="form-label fw-semibold">Quantity</label>
-                            <input type="number" name="quantity" id="quantityInput"
-                                   value="1" min="1" class="form-control">
-                        </div>
-                        
-                        <button type="submit" id="addToCartBtn" class="btn btn-dark btn-lg flex-grow-1 py-3" style="background-color: #1a1a2e;">
-                            <i class="fa-solid fa-bag-shopping me-2"></i> Add to Cart
-                        </button>
-                    </div>
-                </form>
-            </div>
-            
-            <div class="mt-4 p-3 bg-light rounded-3 d-flex align-items-center">
-                <i class="fa-solid fa-shop text-muted me-3 fs-4"></i>
-                <div>
-                    <small class="text-muted d-block">Verified Seller</small>
-                    <span class="fw-semibold text-dark" th:text="'ID: ' + ${product.sellerId}">Seller Name</span>
-                </div>
-            </div>
-        </div>
-    </div>
+						<div id="stockText" class="stock-text mb-4 mt-2"></div>
 
-    <div id="variantData" style="display:none;">
-        <div th:each="v : ${product.variants}"
-             class="variant"
-             th:data-id="${v.variantId}"
-             th:data-size="${v.size}"
-             th:data-color="${v.color}"
-             th:data-stock="${v.stockQuantity}">
-        </div>
-    </div>
-</div>
+						<div class="d-flex align-items-end gap-3 mb-4">
+							<div style="width: 100px;">
+								<label class="form-label fw-semibold">Quantity</label> <input
+									type="number" name="quantity" id="quantityInput" value="1"
+									min="1" class="form-control">
+							</div>
 
-<footer class="footer">
-    <div class="container">
-        © 2026 GencFashion. Premium Quality. All rights reserved.
-    </div>
-</footer>
+							<button type="submit" id="addToCartBtn"
+								class="btn btn-dark flex-grow-1"
+								style="background-color: #1a1a2e;">
+								<i class="fa-solid fa-bag-shopping me-2"></i> Add to Cart
+							</button>
+						</div>
+					</form>
+				</div>
 
-<script>
+				<div class="mt-4 p-3 bg-light rounded-3 d-flex align-items-center">
+					<i class="fa-solid fa-shop text-muted me-3 fs-4"></i>
+					<div>
+						<small class="text-muted d-block">Verified Seller</small> <span
+							class="fw-semibold text-dark"
+							th:text="'ID: ' + ${product.sellerId}">Seller Name</span>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div id="variantData" style="display: none;">
+			<div th:each="v : ${product.variants}" class="variant"
+				th:data-id="${v.variantId}" th:data-size="${v.size}"
+				th:data-color="${v.color}" th:data-stock="${v.stockQuantity}">
+			</div>
+		</div>
+	</div>
+
+	<footer class="footer">
+		<div class="container">© 2026 GencFashion. Premium Quality. All
+			rights reserved.</div>
+	</footer>
+
+	<script>
     const variantEls = document.querySelectorAll(".variant");
     const sizeSelect = document.getElementById("sizeSelect");
     const colorSelect = document.getElementById("colorSelect");

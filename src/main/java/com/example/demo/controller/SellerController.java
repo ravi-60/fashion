@@ -163,7 +163,7 @@ public class SellerController {
 	                        @RequestParam("variantsJson") String variantsJson, // Get the JSON string
 	                        @RequestParam(name = "image", required = false) MultipartFile image,
 	                        @AuthenticationPrincipal CustomUserDetails userDetails) {
-	    
+	    System.out.println(variantsJson);
 	    product.setSellerId(userDetails.getUserId());
 
 	    try {

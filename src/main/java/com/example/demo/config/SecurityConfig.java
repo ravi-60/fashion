@@ -18,12 +18,12 @@ public class SecurityConfig {
 	@Autowired
 	private UserDetailsService userDetailsService;
 	
-	//private DaoAuthenticationProvider dao;
+//	private DaoAuthenticationProvider dao;
 
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		http.authorizeHttpRequests(auth -> auth
-				.requestMatchers("/", "/register", "/login", "/css/**", "/js/**", "/api/debug/**", "/images/**")
+				.requestMatchers("/", "/register", "/login", "/css/**", "/js/**", "/images/**")
 				.permitAll().requestMatchers("/admin/**").hasRole("ADMIN").requestMatchers("/seller/**")
 				.hasRole("SELLER").anyRequest().authenticated())
 

@@ -16,8 +16,9 @@ public class AdminController {
 	@GetMapping("/admin/dashboard")
     public String adminDashboard(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            Model model) {
-
+            Model model){
+			
+		
         model.addAttribute("username", userDetails.getUsername());
 
         model.addAttribute("totalUsers",
