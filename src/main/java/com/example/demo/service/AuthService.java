@@ -23,22 +23,20 @@ public class AuthService {
 	private PasswordEncoder passwordEncoder;
 
 	public void registerUser(@Valid UserRegistrationDTO dto) {
-		// Business Logic: Check for duplicate username
+
 		if (userRepository.findFirstByUsername(dto.getUsername()).isPresent()) {
 			throw new IllegalArgumentException("Username '" + dto.getUsername() + "' is already taken.");
 		}
 
-		// 2. Check Email: Same logic
 		if (userRepository.findFirstByEmail(dto.getEmail()).isPresent()) {
 			throw new IllegalArgumentException("Email '" + dto.getEmail() + "' is already taken.");
 		}
 
-		// Mapping and Saving
 		User user = new User();
 		user.setUsername(dto.getUsername());
 		user.setEmail(dto.getEmail());
 		user.setPassword(passwordEncoder.encode(dto.getPassword()));
-		user.setRole(dto.getRole()); // Dynamically assigned from dropdown
+		user.setRole(dto.getRole());
 
 		userRepository.save(user);
 	}

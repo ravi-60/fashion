@@ -73,10 +73,18 @@
         .table { margin-bottom: 0; }
         .table thead { background-color: #f1f5f9; }
         .table thead th { font-weight: 600; color: #475569; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.5px; border: none; padding: 15px; }
+        
+        /* Sorting Link Style */
+        .table thead th a { color: inherit; text-decoration: none; display: flex; align-items: center; gap: 5px; }
+
         .table tbody td { padding: 15px; vertical-align: middle; color: #1e293b; border-color: #f1f5f9; }
 
         .variant-wrapper { background-color: #f8fafc; border-top: 2px solid #e94560; margin: 0 15px 15px 15px; border-radius: 0 0 12px 12px; }
         .badge-stock { padding: 6px 12px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; }
+
+        /* Pagination Style */
+        .page-link { color: #1a1a2e; border: none; margin: 0 3px; border-radius: 6px !important; }
+        .page-item.active .page-link { background-color: #e94560; border-color: #e94560; }
 
         .footer {
             background: #0f172a; color: #e5e7eb; text-align: center;
@@ -105,8 +113,9 @@
                 </div>
 
                 <div class="d-flex justify-content-between align-items-center mb-4">
-                    <form method="get" action="/seller/products" class="search-container flex-grow-1">
-                        <input type="text" name="search" th:value="${param.search}" class="form-control search-input w-100" placeholder="Search by product name...">
+                    <form method="get" th:action="@{/seller/products}" class="search-container flex-grow-1">
+                        <input type="hidden" name="sort" th:value="${sortField + ',' + sortDir}">
+                        <input type="text" name="search" th:value="${search}" class="form-control search-input w-100" placeholder="Search by product name...">
                         <button type="submit" class="btn btn-crimson">Search</button>
                     </form>
 
@@ -120,10 +129,22 @@
                         <table class="table align-middle">
                             <thead>
                                 <tr>
-                                    <th style="width: 80px;">ID</th>
-                                    <th>Product Details</th>
+                                    <th style="width: 80px;">
+                                        <a th:href="@{/seller/products(page=${currentPage}, sort='productId,' + ${reverseSortDir}, search=${search})}">
+                                            ID <i class="bi" th:classappend="${sortField == 'productId'} ? (${sortDir == 'asc'} ? 'bi-sort-up' : 'bi-sort-down') : 'bi-hash'"></i>
+                                        </a>
+                                    </th>
+                                    <th>
+                                        <a th:href="@{/seller/products(page=${currentPage}, sort='productName,' + ${reverseSortDir}, search=${search})}">
+                                            Product Details <i class="bi" th:classappend="${sortField == 'productName'} ? (${sortDir == 'asc'} ? 'bi-sort-up' : 'bi-sort-down') : 'bi-filter'"></i>
+                                        </a>
+                                    </th>
                                     <th>Category</th>
-                                    <th>Price</th>
+                                    <th>
+                                        <a th:href="@{/seller/products(page=${currentPage}, sort='price,' + ${reverseSortDir}, search=${search})}">
+                                            Price <i class="bi" th:classappend="${sortField == 'price'} ? (${sortDir == 'asc'} ? 'bi-sort-up' : 'bi-sort-down') : 'bi-filter'"></i>
+                                        </a>
+                                    </th>
                                     <th>Status</th>
                                     <th class="text-center">Actions</th>
                                 </tr>
@@ -202,6 +223,34 @@
                                 </tr>
                             </tbody>
                         </table>
+                    </div>
+                    
+                    <div class="card-footer bg-white border-top py-3 px-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="small text-muted">
+                                Showing <span th:text="${products.size()}">0</span> of <span th:text="${totalItems}">0</span> products
+                            </div>
+                            
+                            <nav th:if="${totalPages > 1}">
+                                <ul class="pagination pagination-sm mb-0">
+                                    <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                                        <a class="page-link" th:href="@{/seller/products(page=${currentPage - 1}, sort=${sortField} + ',' + ${sortDir}, search=${search})}">
+                                            <i class="bi bi-chevron-left"></i>
+                                        </a>
+                                    </li>
+
+                                    <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}" th:classappend="${currentPage == i} ? 'active'">
+                                        <a class="page-link" th:href="@{/seller/products(page=${i}, sort=${sortField} + ',' + ${sortDir}, search=${search})}" th:text="${i + 1}">1</a>
+                                    </li>
+
+                                    <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                                        <a class="page-link" th:href="@{/seller/products(page=${currentPage + 1}, sort=${sortField} + ',' + ${sortDir}, search=${search})}">
+                                            <i class="bi bi-chevron-right"></i>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
                     </div>
                 </div>
             </div>

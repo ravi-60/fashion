@@ -1,6 +1,11 @@
 package com.example.demo.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -21,19 +26,23 @@ public class AdminUserController {
 	private UserRepository userRepository;
 	@Autowired
 	private PasswordEncoder passwordEncoder;
+	
+	
+	@Value("${admin.users.page.size:5}")
+	int size;
 
 	@GetMapping("/admin/users")
 	public String listUsers(@RequestParam(name = "page", required = false, defaultValue = "0") int page,
 			@RequestParam(name = "sort", required = false, defaultValue = "userId") String sort,
 			@RequestParam(name = "dir", required = false, defaultValue = "asc") String dir,
 			@RequestParam(name = "search", required = false) String search, Model model) {
-		int size = 5;
-		org.springframework.data.domain.Sort.Direction direction = "desc".equalsIgnoreCase(dir)
-				? org.springframework.data.domain.Sort.Direction.DESC
-				: org.springframework.data.domain.Sort.Direction.ASC;
-		org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size,
-				org.springframework.data.domain.Sort.by(direction, sort));
-		org.springframework.data.domain.Page<com.example.demo.model.User> userPage = userService.findUsers(search,
+		
+		Sort.Direction direction = "desc".equalsIgnoreCase(dir)
+				? Sort.Direction.DESC
+				: Sort.Direction.ASC;
+		Pageable pageable = PageRequest.of(page, size,
+				Sort.by(direction, sort));
+		Page<User> userPage = userService.findUsers(search,
 				pageable);
 		model.addAttribute("userPage", userPage);
 		model.addAttribute("users", userPage.getContent());

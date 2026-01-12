@@ -23,27 +23,12 @@ public class OrderController {
         model.addAttribute("orders", orderService.getUserOrders(userDetails.getUserId()));
         return "orders";
     }
+    
+  @PostMapping("/orders/cancel/{id}")
+  @ResponseBody
+  public ResponseEntity<Void> cancelOrder(@PathVariable Long id) {
+      orderService.cancelOrder(id);
+      return ResponseEntity.ok().build();
+  }
 
-//    // --- API endpoints required by the spec ---
-//
-//    @PostMapping("/api/orders/place")
-//    @ResponseBody
-//    public ResponseEntity<Void> placeOrder(@AuthenticationPrincipal CustomUserDetails userDetails) {
-//        orderService.placeOrder(userDetails.getUserId());
-//        return ResponseEntity.ok().build();
-//    }
-//
-//    @GetMapping("/api/orders/{id}")
-//    @ResponseBody
-//    public ResponseEntity<OrderInfo> getOrderDetails(@PathVariable Long id) {
-//        Optional<OrderInfo> order = orderService.getOrderById(id);
-//        return order.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
-//    }
-//
-//    @PostMapping("/api/orders/cancel/{id}")
-//    @ResponseBody
-//    public ResponseEntity<Void> cancelOrder(@PathVariable Long id) {
-//        orderService.cancelOrder(id);
-//        return ResponseEntity.ok().build();
-//    }
 }

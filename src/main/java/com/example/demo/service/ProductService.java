@@ -5,12 +5,16 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.model.CartItem;
 import com.example.demo.model.OrderInfo;
 import com.example.demo.model.Product;
 import com.example.demo.model.Variant;
+import com.example.demo.repository.CartItemRepository;
+import com.example.demo.repository.OrderRepository;
 import com.example.demo.repository.ProductRepository;
 import com.example.demo.repository.VariantRepository;
 
@@ -24,20 +28,20 @@ public class ProductService {
     private VariantRepository variantRepository;
 
     @Autowired
-    private com.example.demo.repository.CartItemRepository cartItemRepository;
+    private CartItemRepository cartItemRepository;
 
     @Autowired
-    private com.example.demo.repository.OrderRepository orderRepository;
+    private OrderRepository orderRepository;
 
     public List<Product> getAllProducts() {
         return productRepository.findAll();
     }
 
-    public org.springframework.data.domain.Page<Product> findProductsBySellerId(Long sellerId, org.springframework.data.domain.Pageable pageable) {
+    public Page<Product> findProductsBySellerId(Long sellerId, Pageable pageable) {
         return productRepository.findBySellerId(sellerId, pageable);
     }
 
-    public org.springframework.data.domain.Page<Product> findProductsBySearch(String search, org.springframework.data.domain.Pageable pageable) {
+    public Page<Product> findProductsBySearch(String search, Pageable pageable) {
         if (search != null && !search.isEmpty()) {
             return productRepository.findByProductNameContainingIgnoreCase(search, pageable);
         }
@@ -114,15 +118,15 @@ public class ProductService {
 
     
     
-    public org.springframework.data.domain.Page<OrderInfo> getClosedOrdersForSellerPaged(
-            Long sellerId, String search, org.springframework.data.domain.Pageable pageable) {
+    public Page<OrderInfo> getClosedOrdersForSellerPaged(
+            Long sellerId, String search, Pageable pageable) {
         
         java.util.List<OrderInfo.OrderStatus> closedStatuses = java.util.List.of(
             OrderInfo.OrderStatus.DELIVERED, 
             OrderInfo.OrderStatus.CANCELLED
         );
         
-        org.springframework.data.domain.Page<OrderInfo> orderPage = 
+        Page<OrderInfo> orderPage = 
             orderRepository.findClosedOrdersBySeller(sellerId, closedStatuses, search, pageable);
         
         // Pre-initialize lazy collections for the template
@@ -153,8 +157,8 @@ public class ProductService {
         return orderRepository.findAverageOrderValueBySeller(sellerId);
     }
 
-    public org.springframework.data.domain.Page<Product> getProductsPaged(
-            String category, String search, org.springframework.data.domain.Pageable pageable) {
+    public Page<Product> getProductsPaged(
+            String category, String search, Pageable pageable) {
         
         // Search by name takes priority
         if (search != null && !search.isEmpty()) {
@@ -168,6 +172,13 @@ public class ProductService {
         
         // Default view (All products)
         return productRepository.findAll(pageable);
+    }
+    
+    public Page<Product> getProductsBySellerAndSearch(Long sellerId, String search, Pageable pageable) {
+        if (search != null && !search.isEmpty()) {
+            return productRepository.findBySellerIdAndProductNameContainingIgnoreCase(sellerId, search, pageable);
+        }
+        return productRepository.findBySellerId(sellerId, pageable);
     }
 
 }

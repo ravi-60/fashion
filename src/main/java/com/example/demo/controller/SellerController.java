@@ -8,6 +8,11 @@ import java.nio.file.StandardCopyOption;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+//Spring Data Pagination & Sorting
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -27,7 +32,6 @@ import com.example.demo.service.OrderService;
 import com.example.demo.service.ProductService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 @Controller
 public class SellerController {
 
@@ -67,18 +71,33 @@ public class SellerController {
 		return "seller_dashboard";
 	}
 
+	
 	@GetMapping("/seller/products")
-	public String listSellerProducts(@AuthenticationPrincipal CustomUserDetails userDetails, Model model,
-			@RequestParam(value = "search", required = false) String search) {
-		List<Product> products;
-		if (search != null && !search.isEmpty()) {
-			products = productService.getProductsBySellerId(userDetails.getUserId()).stream()
-					.filter(p -> p.getProductName().toLowerCase().contains(search.toLowerCase())).toList();
-		} else {
-			products = productService.getProductsBySellerId(userDetails.getUserId());
-		}
-		model.addAttribute("products", products);
-		return "seller_products";
+	public String listSellerProducts(
+	        @AuthenticationPrincipal CustomUserDetails userDetails, 
+	        Model model,
+	        @RequestParam(value = "search", required = false) String search,
+	        @RequestParam(defaultValue = "0") int page,
+	        @RequestParam(defaultValue = "5") int size,
+	        @RequestParam(defaultValue = "productId,asc") String sort) {
+
+	    String[] sortParams = sort.split(",");
+	    Sort sortOrder = sortParams[1].equalsIgnoreCase("asc") ? Sort.by(sortParams[0]).ascending() : Sort.by(sortParams[0]).descending();
+	    Pageable pageable = PageRequest.of(page, size, sortOrder);
+
+	    // CALL THE NEW METHOD HERE
+	    Page<Product> productPage = productService.getProductsBySellerAndSearch(userDetails.getUserId(), search, pageable);
+
+	    model.addAttribute("products", productPage.getContent());
+	    model.addAttribute("currentPage", page);
+	    model.addAttribute("totalPages", productPage.getTotalPages());
+	    model.addAttribute("totalItems", productPage.getTotalElements());
+	    model.addAttribute("sortField", sortParams[0]);
+	    model.addAttribute("sortDir", sortParams[1]);
+	    model.addAttribute("reverseSortDir", sortParams[1].equals("asc") ? "desc" : "asc");
+	    model.addAttribute("search", search);
+
+	    return "seller_products";
 	}
 
 	@GetMapping("/seller/orders")

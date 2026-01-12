@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -40,8 +41,8 @@ public interface OrderRepository extends JpaRepository<OrderInfo, Long> {
     		""")
     		BigDecimal sumTotalRevenue();
 
-    Page<OrderInfo> findAll(org.springframework.data.domain.Pageable pageable);
-    Page<OrderInfo> findBySellerId(Long sellerId, org.springframework.data.domain.Pageable pageable);
+    Page<OrderInfo> findAll(Pageable pageable);
+    Page<OrderInfo> findBySellerId(Long sellerId, Pageable pageable);
 
     
     // edited
@@ -49,11 +50,11 @@ public interface OrderRepository extends JpaRepository<OrderInfo, Long> {
     @Query("SELECT o FROM OrderInfo o WHERE o.sellerId = :sellerId " +
            "AND o.status IN :statuses " +
            "AND (:search IS NULL OR CAST(o.orderId AS string) LIKE %:search%)")
-    org.springframework.data.domain.Page<OrderInfo> findClosedOrdersBySeller(
+    Page<OrderInfo> findClosedOrdersBySeller(
         @Param("sellerId") Long sellerId, 
         @Param("statuses") java.util.List<OrderInfo.OrderStatus> statuses, 
         @Param("search") String search, 
-        org.springframework.data.domain.Pageable pageable
+        Pageable pageable
     );
 
 }

@@ -1,14 +1,17 @@
 package com.example.demo.service;
 
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.example.demo.model.CartItem;
 import com.example.demo.model.User;
 import com.example.demo.model.Variant;
 import com.example.demo.repository.CartItemRepository;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.repository.VariantRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import java.util.List;
 
 @Service
 public class CartService {
@@ -27,7 +30,7 @@ public class CartService {
         Variant variant = variantRepository.findById(variantId).orElseThrow();
         // Determine available stock and existing quantity in cart
         int availableStock = variant.getStockQuantity() == null ? 0 : variant.getStockQuantity();
-        java.util.Optional<CartItem> existing = cartItemRepository.findByCustomer_UserIdAndVariant_VariantId(userId, variantId);
+        Optional<CartItem> existing = cartItemRepository.findByCustomer_UserIdAndVariant_VariantId(userId, variantId);
         if (existing.isPresent()) {
             CartItem item = existing.get();
             int existingQty = item.getQuantity() == null ? 0 : item.getQuantity();

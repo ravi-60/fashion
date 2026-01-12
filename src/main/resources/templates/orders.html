@@ -224,7 +224,7 @@
 
             const orderId = btn.getAttribute('data-id');
 
-            fetch('/api/orders/cancel/' + orderId, { method: 'POST' })
+            fetch('/orders/cancel/' + orderId, { method: 'POST' })
                 .then(resp => {
                     if (resp.ok) {
                         const row = btn.closest('tr');

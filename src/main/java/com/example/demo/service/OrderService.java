@@ -1,18 +1,30 @@
 package com.example.demo.service;
 
-import com.example.demo.model.*;
-import com.example.demo.repository.OrderRepository;
-import com.example.demo.repository.PaymentRepository;
-import com.example.demo.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.example.demo.model.CartItem;
+import com.example.demo.model.OrderInfo;
+import com.example.demo.model.OrderItem;
+import com.example.demo.model.Payment;
+import com.example.demo.model.User;
+import com.example.demo.model.Variant;
+import com.example.demo.repository.OrderItemRepository;
+import com.example.demo.repository.OrderRepository;
+import com.example.demo.repository.PaymentRepository;
+import com.example.demo.repository.UserRepository;
+import com.example.demo.repository.VariantRepository;
 
 @Service
 public class OrderService {
@@ -24,10 +36,10 @@ public class OrderService {
     private PaymentRepository paymentRepository;
 
     @Autowired
-    private com.example.demo.repository.OrderItemRepository orderItemRepository;
+    private OrderItemRepository orderItemRepository;
 
     @Autowired
-    private com.example.demo.repository.VariantRepository variantRepository;
+    private VariantRepository variantRepository;
 
     @Autowired
     private CartService cartService;
@@ -46,7 +58,7 @@ public class OrderService {
 
         // Group cart items by sellerId
         Map<Long, List<CartItem>> itemsBySeller = cartItems.stream()
-            .collect(java.util.stream.Collectors.groupingBy(item -> item.getVariant().getProduct().getSellerId()));
+            .collect(Collectors.groupingBy(item -> item.getVariant().getProduct().getSellerId()));
 
         for (var entry : itemsBySeller.entrySet()) {
             Long sellerId = entry.getKey();
@@ -65,7 +77,7 @@ public class OrderService {
             OrderInfo savedOrder = orderRepository.save(order);
 
             // Save order items and adjust stock immediately (stock will be decreased when order placed)
-            java.util.List<OrderItem> orderItems = new java.util.ArrayList<>();
+            List<OrderItem> orderItems = new ArrayList<>();
             for (CartItem item : sellerItems) {
                 OrderItem oi = new OrderItem();
                 oi.setOrder(savedOrder);
@@ -135,11 +147,11 @@ public class OrderService {
         return orderRepository.findAll();
     }
 
-    public org.springframework.data.domain.Page<OrderInfo> findOrdersBySellerId(Long sellerId, org.springframework.data.domain.Pageable pageable) {
+    public Page<OrderInfo> findOrdersBySellerId(Long sellerId, Pageable pageable) {
         return orderRepository.findBySellerId(sellerId, pageable);
     }
 
-    public org.springframework.data.domain.Page<OrderInfo> findOrders(org.springframework.data.domain.Pageable pageable) {
+    public Page<OrderInfo> findOrders(Pageable pageable) {
         return orderRepository.findAll(pageable);
     }
 }

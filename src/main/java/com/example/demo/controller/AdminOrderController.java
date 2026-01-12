@@ -1,12 +1,20 @@
 package com.example.demo.controller;
 
-import com.example.demo.model.OrderInfo;
-import com.example.demo.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
-import java.util.List;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import com.example.demo.model.OrderInfo;
+import com.example.demo.service.OrderService;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
 
 @Controller
 @RequestMapping("/admin/orders")
@@ -21,9 +29,9 @@ public class AdminOrderController {
                              @RequestParam(name = "sellerId", required = false) Long sellerId,
                              Model model) {
         int size = 5;
-        org.springframework.data.domain.Sort.Direction direction = "desc".equalsIgnoreCase(dir) ? org.springframework.data.domain.Sort.Direction.DESC : org.springframework.data.domain.Sort.Direction.ASC;
-        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size, org.springframework.data.domain.Sort.by(direction, sort));
-        org.springframework.data.domain.Page<OrderInfo> orderPage;
+        Sort.Direction direction = "desc".equalsIgnoreCase(dir) ? Sort.Direction.DESC : Sort.Direction.ASC;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sort));
+        Page<OrderInfo> orderPage;
         if (sellerId != null) {
             orderPage = orderService.findOrdersBySellerId(sellerId, pageable);
         } else {
