@@ -21,8 +21,6 @@ public class ProductController {
     @Autowired
     private ProductService productService;
 
-//    @Autowired
-//    private VariantService variantService;
 
     @GetMapping("/products")
     public String listProducts(

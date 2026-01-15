@@ -15,18 +15,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.example.demo.model.User;
 import com.example.demo.repository.UserRepository;
+import com.example.demo.service.AdminService;
 import com.example.demo.service.UserService;
 
 @Controller
 public class AdminUserController {
 	@Autowired
-	private UserService userService;
-
-	@Autowired
-	private UserRepository userRepository;
-	@Autowired
-	private PasswordEncoder passwordEncoder;
-	
+	private AdminService adminService;
 	
 	@Value("${admin.users.page.size:5}")
 	int size;
@@ -37,13 +32,7 @@ public class AdminUserController {
 			@RequestParam(name = "dir", required = false, defaultValue = "asc") String dir,
 			@RequestParam(name = "search", required = false) String search, Model model) {
 		
-		Sort.Direction direction = "desc".equalsIgnoreCase(dir)
-				? Sort.Direction.DESC
-				: Sort.Direction.ASC;
-		Pageable pageable = PageRequest.of(page, size,
-				Sort.by(direction, sort));
-		Page<User> userPage = userService.findUsers(search,
-				pageable);
+		Page<User> userPage = adminService.listUsersService(page, sort, dir, search, size);
 		model.addAttribute("userPage", userPage);
 		model.addAttribute("users", userPage.getContent());
 		model.addAttribute("currentPage", page);
@@ -57,19 +46,13 @@ public class AdminUserController {
 	@PostMapping("/admin/users/add-admin")
 	public String addAdmin(@RequestParam String username, @RequestParam String email, @RequestParam String password) {
 
-		User admin = new User();
-		if (userRepository.findByUsername(username).isPresent()) {
+		boolean isSaved = adminService.addAdminService(username, email, password);
 
-			return "redirect:/admin/users?error";
-		}
-		admin.setUsername(username);
-		admin.setEmail(email);
-		admin.setPassword(passwordEncoder.encode(password));
-		admin.setRole(User.Role.ADMIN);
-
-		userRepository.save(admin);
-
-		return "redirect:/admin/users?success";
+	    if (isSaved) {
+	        return "redirect:/admin/users?success";
+	    } else {
+	        return "redirect:/admin/users?error";
+	    }
 	}
 
 }

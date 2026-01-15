@@ -28,17 +28,17 @@ public class SecurityConfig {
 				.hasRole("SELLER").anyRequest().authenticated())
 
 
-				.csrf(csrf -> csrf.requireCsrfProtectionMatcher(request -> {
-					String path = request.getRequestURI();
-					return "POST".equals(request.getMethod())
-							&& (path.equals("/login") || path.equals("/admin/users/add-admin"));
-				})).exceptionHandling(
-						exception -> exception.accessDeniedHandler((request, response, accessDeniedException) -> {
-							response.setStatus(403);
-							response.getWriter().write("CSRF Access Denied: Missing or Invalid Token");
-						}))
+//				.csrf(csrf -> csrf.requireCsrfProtectionMatcher(request -> {
+//					String path = request.getRequestURI();
+//					return "POST".equals(request.getMethod())
+//							&& (path.equals("/login") || path.equals("/admin/users/add-admin"));
+//				})).exceptionHandling(
+//						exception -> exception.accessDeniedHandler((request, response, accessDeniedException) -> {
+//							response.setStatus(403);
+//							response.getWriter().write("CSRF Access Denied: Missing or Invalid Token");
+//						}))
 		
-//		.csrf(c -> c.disable())
+		.csrf(c -> c.disable())
 				.formLogin(form -> form.loginPage("/login").successHandler((request, response, authentication) -> {
 					CustomUserDetails user = (CustomUserDetails) authentication.getPrincipal();
 					String role = user.getRole().name();
