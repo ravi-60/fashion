@@ -22,7 +22,7 @@ public class AuthService {
 	@Autowired
 	private PasswordEncoder passwordEncoder;
 
-	public void registerUser(@Valid UserRegistrationDTO dto) {
+	public void registerUser(UserRegistrationDTO dto) {
 
 		if (userRepository.findFirstByUsername(dto.getUsername()).isPresent()) {
 			throw new IllegalArgumentException("Username '" + dto.getUsername() + "' is already taken.");

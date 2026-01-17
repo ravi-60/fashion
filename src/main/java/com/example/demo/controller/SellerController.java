@@ -10,11 +10,13 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.demo.config.CustomUserDetails;
 import com.example.demo.model.OrderInfo;
 import com.example.demo.model.Product;
+import com.example.demo.service.OrderService;
 import com.example.demo.service.ProductService;
 import com.example.demo.service.SellerService;
 
@@ -25,7 +27,10 @@ public class SellerController {
     private SellerService sellerService; // Use the new Service
 
     @Autowired
-    private ProductService productService; // Still needed for dashboard stats
+    private ProductService productService;
+    
+    @Autowired
+    private OrderService orderService;
 
     @GetMapping("/seller/profile")
     public String sellerProfile(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
@@ -91,6 +96,13 @@ public class SellerController {
         model.addAttribute("search", search);
         return "seller_all_orders";
     }
+    
+	@GetMapping("/seller/products/add")
+	public String showAddProductForm(Model model) {
+		model.addAttribute("product", new Product());
+		model.addAttribute("formAction", "/seller/products/add");
+		return "seller_product_form";
+	}
 
     @PostMapping("/seller/products/add")
     public String addProduct(@ModelAttribute Product product, @RequestParam("variantsJson") String variantsJson,
@@ -121,4 +133,20 @@ public class SellerController {
         sellerService.deleteProductService(id, userDetails.getUserId());
         return "redirect:/seller/products?deleted";
     }
+    
+    @PostMapping("/seller/orders/delivered/{id}")
+    @ResponseBody
+	public String markOrderAsDelivered(@PathVariable Long id) {
+		// Optionally, check if the order belongs to this seller
+		orderService.markAsDelivered(id);
+		return "redirect:/seller/orders";
+	}
+    
+    @PostMapping("/seller/orders/cancel/{id}")
+    @ResponseBody
+	public String cancelOrder(@PathVariable Long id) {
+		// Optionally, check if the order belongs to this seller
+		orderService.cancelOrder(id);
+		return "redirect:/seller/orders";
+	}
 }

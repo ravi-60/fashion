@@ -13,7 +13,7 @@ public class GlobalExceptionHandler {
 	@ExceptionHandler(MethodArgumentNotValidException.class)
     public String handleValidationErrors(MethodArgumentNotValidException ex, Model model) {
         model.addAttribute("org.springframework.validation.BindingResult.user", ex.getBindingResult());
-        model.addAttribute("user", ex.getBindingResult().getTarget());
+//        model.addAttribute("user", ex.getBindingResult().getTarget());
         return "register"; 
     }
 

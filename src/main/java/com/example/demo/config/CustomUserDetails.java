@@ -1,15 +1,20 @@
 package com.example.demo.config;
 
-import com.example.demo.model.User;
+import java.util.Collection;
+import java.util.Collections;
+
+import org.springframework.security.access.expression.SecurityExpressionRoot;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import java.util.Collection;
-import java.util.Collections;
+
+import com.example.demo.model.User;
 
 public class CustomUserDetails implements UserDetails {
 
     private final User user;
+    
+//    private SecurityExpressionRoot sp; // for ROLE_
 
     public CustomUserDetails(User user) {
         this.user = user;
