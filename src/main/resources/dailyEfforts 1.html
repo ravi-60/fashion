@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Efforts | Coach Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --background: #0a0a0c;
+            --sidebar: rgba(15, 15, 18, 0.8);
+            --border: rgba(255, 255, 255, 0.1);
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --primary: #00d2ff;
+            --neon-blue: #00d2ff;
+            --neon-purple: #9d50bb;
+            --foreground: #e2e8f0;
+            --muted-foreground: #94a3b8;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --destructive: #ef4444;
+            --sidebar-width: 280px;
+            --sidebar-collapsed: 80px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            background-color: var(--background);
+            color: var(--foreground);
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* --- Background Effects --- */
+        .orb {
+            position: fixed; border-radius: 50%; filter: blur(100px); opacity: 0.15; z-index: -1;
+            pointer-events: none;
+        }
+        .orb-1 { width: 500px; height: 500px; background: var(--neon-blue); top: -100px; right: -100px; }
+        .orb-2 { width: 400px; height: 400px; background: var(--neon-purple); bottom: -50px; left: -50px; }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-up { animation: fadeInUp 0.5s ease forwards; }
+
+        /* --- Sidebar (Synced with Dashboard) --- */
+        aside {
+            position: fixed; left: 0; top: 0; height: 100vh; width: var(--sidebar-width);
+            background: var(--sidebar); backdrop-filter: blur(24px); border-right: 1px solid var(--border);
+            z-index: 50; display: flex; flex-direction: column; transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        aside.collapsed { width: var(--sidebar-collapsed); }
+
+        .sidebar-header {
+            height: 64px; display: flex; align-items: center; justify-content: space-between;
+            padding: 0 16px; border-bottom: 1px solid var(--border);
+        }
+        .logo-container { display: flex; align-items: center; gap: 12px; overflow: hidden; }
+        .logo-icon {
+            min-width: 40px; height: 40px; border-radius: 10px;
+            background: linear-gradient(135deg, var(--primary), var(--neon-purple));
+            display: flex; align-items: center; justify-content: center; color: white;
+        }
+        .logo-text h1 { font-size: 14px; font-weight: 700; white-space: nowrap; }
+        .logo-text p { font-size: 11px; color: var(--muted-foreground); white-space: nowrap; }
+
+        .nav-list { flex: 1; padding: 16px 12px; list-style: none; }
+        .nav-item {
+            display: flex; align-items: center; gap: 12px; padding: 12px;
+            border-radius: 10px; color: var(--muted-foreground); text-decoration: none;
+            margin-bottom: 4px; transition: all 0.2s; cursor: pointer; border: none;
+            background: transparent; width: 100%; font-family: inherit; font-size: 14px;
+        }
+        .nav-item:hover { color: var(--foreground); background: var(--glass-bg); transform: translateX(4px); }
+        .nav-item.active { background: rgba(0, 210, 255, 0.1); color: var(--primary); }
+        .nav-label { white-space: nowrap; transition: opacity 0.2s; }
+        
+        .collapsed .nav-label, .collapsed .logo-text, .collapsed .user-info { 
+            opacity: 0; pointer-events: none; width: 0; margin: 0; 
+        }
+
+        .sidebar-footer { padding: 16px; border-top: 1px solid var(--border); }
+        .user-pill { display: flex; align-items: center; gap: 12px; overflow: hidden; }
+        .avatar {
+            min-width: 40px; height: 40px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
+            display: flex; align-items: center; justify-content: center; font-weight: 600; color: white;
+        }
+
+        /* --- Layout --- */
+        main {
+            margin-left: var(--sidebar-width);
+            transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            min-height: 100vh;
+        }
+        main.expanded { margin-left: var(--sidebar-collapsed); }
+
+        .top-bar {
+            height: 64px; border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 24px; position: sticky; top: 0;
+            background: rgba(10, 10, 12, 0.8); backdrop-filter: blur(12px); z-index: 40;
+        }
+        .hub-tag { font-size: 13px; font-weight: 500; color: var(--muted-foreground); }
+        .hub-tag span { color: var(--primary); }
+
+        /* --- Grid & Cards --- */
+        .page-content { padding: 40px 32px; max-width: 1400px; margin: 0 auto; }
+        .effort-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px; }
+        
+        .glass-card {
+            background: var(--glass-bg); border: 1px solid var(--glass-border);
+            border-radius: 16px; padding: 24px; backdrop-filter: blur(12px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .glass-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(0, 210, 255, 0.4);
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+        }
+
+        .pill { padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; border: 1px solid var(--border); background: rgba(255,255,255,0.03); color: var(--muted-foreground); }
+
+        /* --- Buttons & Forms --- */
+        .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: 0.2s; border: 1px solid transparent; }
+        .btn-primary { background: var(--primary); color: #000; box-shadow: 0 4px 15px rgba(0, 210, 255, 0.3); }
+        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--foreground); }
+        .btn-outline:hover { background: var(--glass-bg); border-color: var(--muted-foreground); }
+        .btn-ghost { background: transparent; border: none; color: var(--muted-foreground); padding: 8px; border-radius: 8px; cursor: pointer; }
+
+        input, select { background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border); color: white; padding: 12px; border-radius: 10px; outline: none; width: 100%; font-family: inherit; }
+        input:focus { border-color: var(--primary); }
+        label { font-size: 11px; font-weight: 700; color: var(--muted-foreground); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; display: block; }
+
+        .hidden { display: none !important; }
+        
+        @media (max-width: 1024px) {
+            aside { transform: translateX(-100%); }
+            main { margin-left: 0 !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    <aside id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-container">
+                <div class="logo-icon"><i data-lucide="zap"></i></div>
+                <div class="logo-text">
+                    <h1>Coach Hub</h1>
+                    <p>Training Operations</p>
+                </div>
+            </div>
+            <button class="btn-ghost" onclick="toggleSidebar()"><i data-lucide="menu"></i></button>
+        </div>
+
+        <ul class="nav-list">
+            <li><a href="Dashboard.html" class="nav-item"><i data-lucide="layout-dashboard"></i> <span class="nav-label">Dashboard</span></a></li>
+            <li><a href="dailyEfforts.html" class="nav-item active"><i data-lucide="calendar-plus"></i> <span class="nav-label">Log Effort</span></a></li>
+            <li><a href="cohort.html" class="nav-item"><i data-lucide="graduation-cap"></i> <span class="nav-label">My Cohorts</span></a></li>
+            <li><a href="candidates.html" class="nav-item"><i data-lucide="users"></i> <span class="nav-label">My Candidates</span></a></li>
+            <li><a href="reports.html" class="nav-item"><i data-lucide="file-text"></i> <span class="nav-label">My Reports</span></a></li>
+        </ul>
+
+        <div class="sidebar-footer">
+            <div class="user-pill">
+                <div class="avatar">SC</div>
+                <div class="user-info">
+                    <p style="font-size: 14px; font-weight: 500;">Sarah Chen</p>
+                    <p style="font-size: 11px; color: var(--muted-foreground);">Technical Coach</p>
+                </div>
+            </div>
+            <button class="nav-item" style="color: var(--destructive); margin-top: 16px; border:none; background:none;"><i data-lucide="log-out"></i> <span class="nav-label">Logout</span></button>
+        </div>
+    </aside>
+
+    <main id="main-content">
+        <header class="top-bar">
+            <div class="hub-tag">Assigned Hub: <span>Bangalore North</span></div>
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <button class="btn-ghost"><i data-lucide="bell" style="width: 20px;"></i></button>
+                <div style="display: flex; align-items: center; gap: 10px; background: var(--glass-bg); padding: 6px 12px; border-radius: 10px; border: 1px solid var(--border);">
+                    <div class="avatar" style="width: 28px; height: 28px; font-size: 12px;">SC</div>
+                    <span style="font-size: 13px; font-weight: 500;">Jan 22, 2026</span>
+                </div>
+            </div>
+        </header>
+
+        <div id="dashboard-view" class="page-content">
+            <div class="animate-up" style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:40px;">
+                <div>
+                    <h1 style="font-size:32px; font-weight:700; letter-spacing:-0.5px">Daily Effort Logs</h1>
+                    <p style="color:var(--muted-foreground); margin-top:8px">Track and manage training session outputs for your cohorts.</p>
+                </div>
+                <button class="btn btn-primary" onclick="showNewEntry()"><i data-lucide="plus"></i> Log New Effort</button>
+            </div>
+
+            <div class="effort-grid animate-up" id="effortGrid" style="animation-delay: 0.1s;">
+                </div>
+        </div>
+
+        <div id="entry-view" class="page-content hidden">
+            <button class="btn btn-outline" onclick="showDashboard()" style="margin-bottom:24px"><i data-lucide="arrow-left"></i> Back to Logs</button>
+            
+            <div class="glass-card animate-up" style="max-width: 800px; margin: 0 auto;">
+                <h2 style="font-size:20px; font-weight:600; margin-bottom:32px; border-bottom: 1px solid var(--border); padding-bottom: 16px;">New Effort Entry</h2>
+                
+                <form id="entryForm" style="display:grid; grid-template-columns:1fr 1fr; gap:24px">
+                    <div style="display:flex; flex-direction:column;">
+                        <label>Target Cohort</label>
+                        <select id="fCohort" required>
+                            <option value="RF-2024-01">GenC Batch Alpha (React)</option>
+                            <option value="AWS-24-05">Java Fullstack - Batch D</option>
+                        </select>
+                    </div>
+                    <div style="display:flex; flex-direction:column;">
+                        <label>Date of Activity</label>
+                        <input type="date" id="fDate" required>
+                    </div>
+                    <div style="grid-column: span 2; display:flex; flex-direction:column;">
+                        <label>Topic / Learning Area</label>
+                        <input type="text" id="fTopic" placeholder="e.g. Redux Toolkit Middleware Implementation" required>
+                    </div>
+                    <div style="display:flex; flex-direction:column;">
+                        <label>Duration (Hours)</label>
+                        <input type="number" id="fHours" step="0.5" value="6" required>
+                    </div>
+                    <div style="display:flex; flex-direction:column;">
+                        <label>Status</label>
+                        <select id="fStatus">
+                            <option value="Completed">Completed</option>
+                            <option value="In Progress">In Progress</option>
+                        </select>
+                    </div>
+                    <div style="grid-column: span 2; margin-top:16px; display:flex; justify-content:flex-end; gap:12px">
+                        <button type="reset" class="btn btn-outline">Discard</button>
+                        <button type="submit" class="btn btn-primary">Save Activity Log</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        lucide.createIcons();
+
+        // Initial Sample Data
+        let efforts = [
+            { id: 1, cohort: 'RF-2024-01', trainee: 'GenC Batch Alpha', topic: 'Redux State Management', hours: 6, date: '2026-01-22', status: 'Completed' },
+            { id: 2, cohort: 'AWS-24-05', trainee: 'Java Batch D', topic: 'Microservices Architecture', hours: 4, date: '2026-01-22', status: 'In Progress' }
+        ];
+
+        function toggleSidebar() {
+            const sb = document.getElementById('sidebar');
+            const main = document.getElementById('main-content');
+            sb.classList.toggle('collapsed');
+            main.classList.toggle('expanded');
+        }
+
+        function showNewEntry() {
+            document.getElementById('dashboard-view').classList.add('hidden');
+            document.getElementById('entry-view').classList.remove('hidden');
+            document.getElementById('fDate').valueAsDate = new Date();
+        }
+
+        function showDashboard() {
+            document.getElementById('entry-view').classList.add('hidden');
+            document.getElementById('dashboard-view').classList.remove('hidden');
+            renderEfforts();
+        }
+
+        function renderEfforts() {
+            const grid = document.getElementById('effortGrid');
+            grid.innerHTML = efforts.map(e => `
+                <div class="glass-card">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px">
+                        <span class="pill">${e.cohort}</span>
+                        <div style="width:10px; height:10px; border-radius:50%; background:${e.status === 'Completed' ? 'var(--success)' : 'var(--warning)'}; box-shadow: 0 0 10px ${e.status === 'Completed' ? 'rgba(16, 185, 129, 0.4)' : 'rgba(245, 158, 11, 0.4)'}"></div>
+                    </div>
+                    <h3 style="font-size:18px; font-weight:600; margin-bottom:8px; line-height:1.4">${e.topic}</h3>
+                    <p style="color:var(--muted-foreground); font-size:13px; margin-bottom:20px">${e.trainee}</p>
+                    
+                    <div style="display:flex; justify-content:space-between; align-items:center; padding-top:16px; border-top:1px solid var(--border)">
+                        <div style="display:flex; align-items:center; gap:6px; color:var(--muted-foreground); font-size:13px">
+                            <i data-lucide="clock" style="width:14px"></i> ${e.hours}h Logged
+                        </div>
+                        <span style="font-size:11px; font-weight:700; color:var(--muted-foreground)">${e.date}</span>
+                    </div>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        document.getElementById('entryForm').onsubmit = (e) => {
+            e.preventDefault();
+            const selectedCohort = document.getElementById('fCohort');
+            efforts.unshift({
+                id: Date.now(),
+                cohort: selectedCohort.value,
+                trainee: selectedCohort.options[selectedCohort.selectedIndex].text.split(' (')[0],
+                date: document.getElementById('fDate').value,
+                topic: document.getElementById('fTopic').value,
+                hours: document.getElementById('fHours').value,
+                status: document.getElementById('fStatus').value
+            });
+            showDashboard();
+        };
+
+        window.onload = renderEfforts;
+    </script>
+</body>
+</html>

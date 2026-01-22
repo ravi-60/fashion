@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cohort Effort Management | Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        :root {
+            --background: #0a0a0c;
+            --sidebar: rgba(15, 15, 18, 0.8);
+            --border: rgba(255, 255, 255, 0.1);
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --primary: #00d2ff;
+            --neon-blue: #00d2ff;
+            --neon-purple: #9d50bb;
+            --foreground: #e2e8f0;
+            --muted-foreground: #94a3b8;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --info: #3b82f6;
+            --destructive: #ef4444;
+            --sidebar-width: 280px;
+            --sidebar-collapsed: 80px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            background-color: var(--background);
+            color: var(--foreground);
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* --- Floating Orbs (Background Effect) --- */
+        .orb {
+            position: fixed; border-radius: 50%; filter: blur(100px); opacity: 0.15; z-index: -1;
+            pointer-events: none;
+        }
+        .orb-1 { width: 500px; height: 500px; background: var(--neon-blue); top: -100px; right: -100px; }
+        .orb-2 { width: 400px; height: 400px; background: var(--neon-purple); bottom: -50px; left: -50px; }
+
+        /* --- Animations --- */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideInLeft {
+            from { transform: translateX(-100%); }
+            to { transform: translateX(0); }
+        }
+        .animate-up { animation: fadeInUp 0.5s ease forwards; }
+
+        /* --- Sidebar --- */
+        aside {
+            position: fixed; left: 0; top: 0; height: 100vh;
+            background: var(--sidebar);
+            backdrop-filter: blur(24px);
+            border-right: 1px solid var(--border);
+            width: var(--sidebar-width);
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 50;
+            display: flex; flex-direction: column;
+        }
+        aside.collapsed { width: var(--sidebar-collapsed); }
+
+        .sidebar-header {
+            height: 64px; display: flex; align-items: center; justify-content: space-between;
+            padding: 0 16px; border-bottom: 1px solid var(--border);
+        }
+        .logo-container { display: flex; align-items: center; gap: 12px; overflow: hidden; }
+        .logo-icon {
+            min-width: 40px; height: 40px; border-radius: 10px;
+            background: linear-gradient(135deg, var(--primary), var(--neon-purple));
+            display: flex; align-items: center; justify-content: center; color: white;
+        }
+        .logo-text h1 { font-size: 14px; font-weight: 700; white-space: nowrap; }
+        .logo-text p { font-size: 11px; color: var(--muted-foreground); white-space: nowrap; }
+
+        .nav-list { flex: 1; padding: 16px 12px; list-style: none; }
+        .nav-item {
+            display: flex; align-items: center; gap: 12px; padding: 12px;
+            border-radius: 10px; color: var(--muted-foreground); text-decoration: none;
+            margin-bottom: 4px; transition: all 0.2s; cursor: pointer; border: none;
+            background: transparent; width: 100%; font-family: inherit; font-size: 14px;
+        }
+        .nav-item:hover { color: var(--foreground); background: var(--glass-bg); transform: translateX(4px); }
+        .nav-item.active { background: rgba(0, 210, 255, 0.1); color: var(--primary); }
+        .nav-label { white-space: nowrap; transition: opacity 0.2s; }
+        
+        .collapsed .nav-label, .collapsed .logo-text, .collapsed .user-info { 
+            opacity: 0; pointer-events: none; width: 0; margin: 0; 
+        }
+
+        .sidebar-footer { padding: 16px; border-top: 1px solid var(--border); }
+        .user-pill { display: flex; align-items: center; gap: 12px; overflow: hidden; }
+        .avatar {
+            min-width: 40px; height: 40px; border-radius: 50%;
+            background: linear-gradient(to bottom right, #444, #222);
+            display: flex; align-items: center; justify-content: center; font-weight: 600;
+        }
+        .logout-btn {
+            margin-top: 16px; color: var(--destructive);
+        }
+        .logout-btn:hover { background: rgba(239, 68, 68, 0.1); color: var(--destructive); }
+
+        /* --- Main Layout Structure --- */
+        main {
+            margin-left: var(--sidebar-width);
+            transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            min-height: 100vh;
+        }
+        main.expanded { margin-left: var(--sidebar-collapsed); }
+
+        /* --- Top Bar --- */
+        .top-bar {
+            height: 64px; border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 24px; position: sticky; top: 0;
+            background: rgba(10, 10, 12, 0.8); backdrop-filter: blur(12px); z-index: 40;
+        }
+        .search-container {
+            background: var(--glass-bg); border: 1px solid var(--border);
+            border-radius: 10px; padding: 8px 12px; display: flex; align-items: center;
+            gap: 10px; width: 320px;
+        }
+        .search-container input {
+            background: transparent; border: none; color: white; outline: none; width: 100%; font-size: 14px;
+        }
+
+        /* --- Content Styling --- */
+        .content-wrapper { padding: 32px; max-width: 1400px; margin: 0 auto; }
+        
+        .glass-card {
+            background: var(--glass-bg); border: 1px solid var(--glass-border);
+            border-radius: 16px; padding: 24px; backdrop-filter: blur(12px);
+            position: relative; overflow: hidden;
+        }
+
+        /* --- Stats Grid --- */
+        .stats-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 24px; margin-top: 32px;
+        }
+        .stat-value { font-size: 28px; font-weight: 700; margin: 12px 0; display: block; }
+        .stat-change { font-size: 12px; font-weight: 500; }
+        .change-up { color: var(--success); }
+        .change-neutral { color: var(--muted-foreground); }
+
+        /* --- Dashboard Body Grid --- */
+        .dashboard-grid {
+            display: grid; grid-template-columns: 2fr 1fr;
+            gap: 24px; margin-top: 32px;
+        }
+
+        /* --- Cohort Item --- */
+        .cohort-list { display: flex; flex-direction: column; gap: 12px; }
+        .cohort-card {
+            display: flex; align-items: center; gap: 16px; padding: 16px;
+            background: rgba(255,255,255,0.02); border: 1px solid var(--border);
+            border-radius: 12px; transition: 0.3s;
+        }
+        .cohort-card:hover { border-color: var(--primary); background: rgba(255,255,255,0.04); }
+        
+        .progress-wrapper { text-align: right; min-width: 100px; }
+        .progress-track { height: 6px; background: #222; border-radius: 3px; margin-top: 8px; overflow: hidden; }
+        .progress-bar { height: 100%; background: linear-gradient(90deg, var(--neon-blue), var(--neon-purple)); border-radius: 3px; }
+
+        .badge-active { padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; background: rgba(16, 185, 129, 0.1); color: var(--success); }
+
+        /* --- Activity List --- */
+        .activity-item { display: flex; gap: 12px; margin-bottom: 20px; }
+        .activity-icon {
+            width: 28px; height: 28px; border-radius: 50%; display: flex;
+            align-items: center; justify-content: center; flex-shrink: 0;
+        }
+
+        /* --- Buttons --- */
+        .btn-outline {
+            background: transparent; border: 1px solid var(--border); color: var(--foreground);
+            padding: 8px 16px; border-radius: 8px; cursor: pointer; transition: 0.2s; font-size: 13px;
+        }
+        .btn-outline:hover { background: var(--glass-bg); border-color: var(--muted-foreground); }
+        
+        .btn-ghost {
+            background: transparent; border: none; color: var(--muted-foreground);
+            padding: 6px; border-radius: 6px; cursor: pointer; transition: 0.2s;
+        }
+        .btn-ghost:hover { background: var(--glass-bg); color: var(--foreground); }
+
+        /* --- Responsive Logic --- */
+        @media (max-width: 1024px) {
+            aside { transform: translateX(-100%); width: 280px; }
+            aside.mobile-open { transform: translateX(0); }
+            main { margin-left: 0 !important; }
+            .dashboard-grid { grid-template-columns: 1fr; }
+            .top-bar { padding: 0 16px; }
+            .mobile-header { display: flex !important; }
+            .top-bar-desktop { display: none !important; }
+        }
+
+        .mobile-header {
+            display: none; height: 64px; border-bottom: 1px solid var(--border);
+            position: fixed; top: 0; left: 0; right: 0; z-index: 60;
+            background: var(--background); padding: 0 16px; align-items: center; justify-content: space-between;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    <div class="mobile-header">
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <div class="logo-icon" style="width: 32px; height: 32px;"><i data-lucide="graduation-cap" style="width: 18px;"></i></div>
+            <span style="font-weight: 700; font-size: 14px;">Cohort Platform</span>
+        </div>
+        <button class="btn-ghost" onclick="toggleMobileMenu()"><i data-lucide="menu"></i></button>
+    </div>
+
+    <aside id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-container">
+                <div class="logo-icon"><i data-lucide="graduation-cap"></i></div>
+                <div class="logo-text">
+                    <h1>Cohort Effort</h1>
+                    <p>Management</p>
+                </div>
+            </div>
+            <button class="btn-ghost" onclick="toggleSidebar()"><i data-lucide="menu"></i></button>
+        </div>
+
+        <ul class="nav-list">
+            <li><button class="nav-item active"><i data-lucide="layout-dashboard"></i> <span class="nav-label">Dashboard</span></button></li>
+            <li><button class="nav-item"><i data-lucide="graduation-cap"></i> <span class="nav-label">Cohorts</span></button></li>
+            <li><button class="nav-item"><i data-lucide="users"></i> <span class="nav-label">Candidates</span></button></li>
+            <li><button class="nav-item"><i data-lucide="calendar"></i> <span class="nav-label">Daily Efforts</span></button></li>
+            <li><button class="nav-item"><i data-lucide="bar-chart-3"></i> <span class="nav-label">Reports</span></button></li>
+            <li><button class="nav-item"><i data-lucide="settings"></i> <span class="nav-label">Settings</span></button></li>
+        </ul>
+
+        <div class="sidebar-footer">
+            <div class="user-pill">
+                <div class="avatar">A</div>
+                <div class="user-info">
+                    <p style="font-size: 14px; font-weight: 500;">Admin User</p>
+                    <p style="font-size: 11px; color: var(--muted-foreground); text-transform: capitalize;">Administrator</p>
+                </div>
+            </div>
+            <button class="nav-item logout-btn"><i data-lucide="log-out"></i> <span class="nav-label">Logout</span></button>
+        </div>
+    </aside>
+
+    <main id="main-content">
+        <header class="top-bar top-bar-desktop">
+            <div class="search-container">
+                <i data-lucide="search" style="width: 16px; color: var(--muted-foreground);"></i>
+                <input type="text" placeholder="Search cohorts, candidates...">
+            </div>
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <button class="btn-ghost" style="position: relative;">
+                    <i data-lucide="bell" style="width: 20px;"></i>
+                    <span style="position: absolute; top: 4px; right: 4px; width: 8px; height: 8px; background: var(--primary); border-radius: 50%; border: 2px solid var(--background);"></span>
+                </button>
+                <div style="display: flex; align-items: center; gap: 10px; background: var(--glass-bg); padding: 6px 12px; border-radius: 10px; border: 1px solid var(--border);">
+                    <div class="avatar" style="width: 28px; height: 28px; font-size: 12px;">A</div>
+                    <span style="font-size: 13px; font-weight: 500;">Admin User</span>
+                    <i data-lucide="chevron-down" style="width: 14px; color: var(--muted-foreground);"></i>
+                </div>
+            </div>
+        </header>
+
+        <div class="content-wrapper">
+            <header class="animate-up" style="margin-top: 20px;">
+                <h1 style="font-size: 32px; font-weight: 700;">Welcome back, Admin</h1>
+                <p style="color: var(--muted-foreground); margin-top: 8px;">Here's an overview of all training operations</p>
+            </header>
+
+            <div class="stats-grid">
+                <div class="glass-card animate-up" style="animation-delay: 0.1s;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; color: var(--muted-foreground);">
+                        <span style="font-size: 14px; font-weight: 500;">Active Cohorts</span>
+                        <i data-lucide="graduation-cap" style="width: 20px; color: var(--info);"></i>
+                    </div>
+                    <span class="stat-value">12</span>
+                    <span class="stat-change change-up">+2 this month</span>
+                </div>
+                <div class="glass-card animate-up" style="animation-delay: 0.2s;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; color: var(--muted-foreground);">
+                        <span style="font-size: 14px; font-weight: 500;">Total Candidates</span>
+                        <i data-lucide="users" style="width: 20px; color: var(--neon-purple);"></i>
+                    </div>
+                    <span class="stat-value">450</span>
+                    <span class="stat-change change-up">+28 this week</span>
+                </div>
+                <div class="glass-card animate-up" style="animation-delay: 0.3s;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; color: var(--muted-foreground);">
+                        <span style="font-size: 14px; font-weight: 500;">Avg. Completion</span>
+                        <i data-lucide="trending-up" style="width: 20px; color: var(--success);"></i>
+                    </div>
+                    <span class="stat-value">78%</span>
+                    <span class="stat-change change-up">+5% vs last month</span>
+                </div>
+                <div class="glass-card animate-up" style="animation-delay: 0.4s;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; color: var(--muted-foreground);">
+                        <span style="font-size: 14px; font-weight: 500;">Pending Reports</span>
+                        <i data-lucide="calendar" style="width: 20px; color: var(--warning);"></i>
+                    </div>
+                    <span class="stat-value">3</span>
+                    <span class="stat-change change-neutral">Due this Friday</span>
+                </div>
+            </div>
+
+            <div class="dashboard-grid">
+                <div class="glass-card animate-up" style="animation-delay: 0.5s;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                        <h2 style="font-size: 18px; font-weight: 600;">Active Cohorts</h2>
+                        <button class="btn-outline">View All <i data-lucide="arrow-up-right" style="width: 14px; margin-left: 4px;"></i></button>
+                    </div>
+                    <div class="cohort-list">
+                        <div class="cohort-card">
+                            <div class="logo-icon" style="background: rgba(0,210,255,0.1); color: var(--primary);">
+                                <i data-lucide="graduation-cap"></i>
+                            </div>
+                            <div style="flex: 1;">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <h3 style="font-size: 15px; font-weight: 600;">GenC Batch Alpha</h3>
+                                    <span class="badge-active">Active</span>
+                                </div>
+                                <p style="font-size: 12px; color: var(--muted-foreground); margin-top: 4px;">React/Node.js • Bangalore • 45 candidates</p>
+                            </div>
+                            <div class="progress-wrapper">
+                                <span style="font-size: 13px; font-weight: 600;">85%</span>
+                                <div class="progress-track"><div class="progress-bar" style="width: 85%;"></div></div>
+                            </div>
+                            <button class="btn-ghost"><i data-lucide="more-horizontal"></i></button>
+                        </div>
+                        <div class="cohort-card">
+                            <div class="logo-icon" style="background: rgba(0,210,255,0.1); color: var(--primary);">
+                                <i data-lucide="graduation-cap"></i>
+                            </div>
+                            <div style="flex: 1;">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <h3 style="font-size: 15px; font-weight: 600;">GenC Batch Beta</h3>
+                                    <span class="badge-active">Active</span>
+                                </div>
+                                <p style="font-size: 12px; color: var(--muted-foreground); margin-top: 4px;">Java Fullstack • Hyderabad • 38 candidates</p>
+                            </div>
+                            <div class="progress-wrapper">
+                                <span style="font-size: 13px; font-weight: 600;">42%</span>
+                                <div class="progress-track"><div class="progress-bar" style="width: 42%;"></div></div>
+                            </div>
+                            <button class="btn-ghost"><i data-lucide="more-horizontal"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-card animate-up" style="animation-delay: 0.6s;">
+                    <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 24px;">Recent Activity</h2>
+                    <div class="activity-list">
+                        <div class="activity-item">
+                            <div class="activity-icon" style="background: rgba(16, 185, 129, 0.1); color: var(--success);"><i data-lucide="check-circle-2" style="width: 14px;"></i></div>
+                            <div style="flex: 1;">
+                                <p style="font-size: 13px; font-weight: 600;">Daily effort submitted</p>
+                                <p style="font-size: 11px; color: var(--muted-foreground);">GenC Batch Alpha</p>
+                            </div>
+                            <span style="font-size: 11px; color: var(--muted-foreground);">2h ago</span>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-icon" style="background: rgba(59, 130, 246, 0.1); color: var(--info);"><i data-lucide="clock" style="width: 14px;"></i></div>
+                            <div style="flex: 1;">
+                                <p style="font-size: 13px; font-weight: 600;">New candidate added</p>
+                                <p style="font-size: 11px; color: var(--muted-foreground);">GenC Batch Beta</p>
+                            </div>
+                            <span style="font-size: 11px; color: var(--muted-foreground);">4h ago</span>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-icon" style="background: rgba(245, 158, 11, 0.1); color: var(--warning);"><i data-lucide="alert-circle" style="width: 14px;"></i></div>
+                            <div style="flex: 1;">
+                                <p style="font-size: 13px; font-weight: 600;">Weekly report pending</p>
+                                <p style="font-size: 11px; color: var(--muted-foreground);">GenC Batch Gamma</p>
+                            </div>
+                            <span style="font-size: 11px; color: var(--muted-foreground);">1d ago</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-card animate-up" style="margin-top: 32px; animation-delay: 0.7s; border-left: 4px solid var(--primary);">
+                <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 16px;">Quick Actions</h2>
+                <div style="display: flex; flex-wrap: wrap; gap: 12px;">
+                    <button class="btn-outline">Log Daily Effort</button>
+                    <button class="btn-outline">Add Candidates</button>
+                    <button class="btn-outline">Generate Report</button>
+                    <button class="btn-outline" style="background: var(--primary); color: #000; border: none; font-weight: 600;">Assign Coach</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        // State Management
+        let isSidebarCollapsed = false;
+        let isMobileMenuOpen = false;
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('main-content');
+            
+            isSidebarCollapsed = !isSidebarCollapsed;
+            
+            if (isSidebarCollapsed) {
+                sidebar.classList.add('collapsed');
+                mainContent.classList.add('expanded');
+            } else {
+                sidebar.classList.remove('collapsed');
+                mainContent.classList.remove('expanded');
+            }
+        }
+
+        function toggleMobileMenu() {
+            const sidebar = document.getElementById('sidebar');
+            isMobileOpen = !isMobileOpen;
+            
+            if (isMobileOpen) {
+                sidebar.classList.add('mobile-open');
+            } else {
+                sidebar.classList.remove('mobile-open');
+            }
+        }
+
+        // Handle window resize for sidebar behavior
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 1024) {
+                document.getElementById('sidebar').classList.remove('mobile-open');
+            }
+        });
+    </script>
+</body>
+</html>

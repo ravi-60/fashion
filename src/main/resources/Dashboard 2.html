@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coach Portal | Cohort Effort Management</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        :root {
+            --background: #0a0a0c;
+            --sidebar: rgba(15, 15, 18, 0.8);
+            --border: rgba(255, 255, 255, 0.1);
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --primary: #00d2ff;
+            --neon-blue: #00d2ff;
+            --neon-purple: #9d50bb;
+            --foreground: #e2e8f0;
+            --muted-foreground: #94a3b8;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --info: #3b82f6;
+            --destructive: #ef4444;
+            --sidebar-width: 280px;
+            --sidebar-collapsed: 80px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            background-color: var(--background);
+            color: var(--foreground);
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* --- Floating Orbs --- */
+        .orb {
+            position: fixed; border-radius: 50%; filter: blur(100px); opacity: 0.15; z-index: -1;
+            pointer-events: none;
+        }
+        .orb-1 { width: 500px; height: 500px; background: var(--neon-blue); top: -100px; right: -100px; }
+        .orb-2 { width: 400px; height: 400px; background: var(--neon-purple); bottom: -50px; left: -50px; }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-up { animation: fadeInUp 0.5s ease forwards; }
+
+        /* --- Sidebar --- */
+        aside {
+            position: fixed; left: 0; top: 0; height: 100vh;
+            background: var(--sidebar);
+            backdrop-filter: blur(24px);
+            border-right: 1px solid var(--border);
+            width: var(--sidebar-width);
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 50;
+            display: flex; flex-direction: column;
+        }
+        aside.collapsed { width: var(--sidebar-collapsed); }
+
+        .sidebar-header {
+            height: 64px; display: flex; align-items: center; justify-content: space-between;
+            padding: 0 16px; border-bottom: 1px solid var(--border);
+        }
+        .logo-container { display: flex; align-items: center; gap: 12px; overflow: hidden; }
+        .logo-icon {
+            min-width: 40px; height: 40px; border-radius: 10px;
+            background: linear-gradient(135deg, var(--primary), var(--neon-purple));
+            display: flex; align-items: center; justify-content: center; color: white;
+        }
+        .logo-text h1 { font-size: 14px; font-weight: 700; white-space: nowrap; }
+        .logo-text p { font-size: 11px; color: var(--muted-foreground); white-space: nowrap; }
+
+        .nav-list { flex: 1; padding: 16px 12px; list-style: none; }
+        .nav-item {
+            display: flex; align-items: center; gap: 12px; padding: 12px;
+            border-radius: 10px; color: var(--muted-foreground); text-decoration: none;
+            margin-bottom: 4px; transition: all 0.2s; cursor: pointer; border: none;
+            background: transparent; width: 100%; font-family: inherit; font-size: 14px;
+        }
+        .nav-item:hover { color: var(--foreground); background: var(--glass-bg); transform: translateX(4px); }
+        .nav-item.active { background: rgba(0, 210, 255, 0.1); color: var(--primary); }
+        .nav-label { white-space: nowrap; transition: opacity 0.2s; }
+        
+        .collapsed .nav-label, .collapsed .logo-text, .collapsed .user-info { 
+            opacity: 0; pointer-events: none; width: 0; margin: 0; 
+        }
+
+        .sidebar-footer { padding: 16px; border-top: 1px solid var(--border); }
+        .user-pill { display: flex; align-items: center; gap: 12px; overflow: hidden; }
+        .avatar {
+            min-width: 40px; height: 40px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
+            display: flex; align-items: center; justify-content: center; font-weight: 600; color: white;
+        }
+
+        /* --- Layout --- */
+        main {
+            margin-left: var(--sidebar-width);
+            transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            min-height: 100vh;
+        }
+        main.expanded { margin-left: var(--sidebar-collapsed); }
+
+        .top-bar {
+            height: 64px; border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 24px; position: sticky; top: 0;
+            background: rgba(10, 10, 12, 0.8); backdrop-filter: blur(12px); z-index: 40;
+        }
+
+        .content-wrapper { padding: 32px; max-width: 1400px; margin: 0 auto; }
+        
+        /* --- Card & Hover Effects (Matching Admin Exactly) --- */
+        .glass-card {
+            background: var(--glass-bg); border: 1px solid var(--glass-border);
+            border-radius: 16px; padding: 24px; backdrop-filter: blur(12px);
+            position: relative; overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .glass-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(0, 210, 255, 0.4);
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5), 0 0 20px -5px rgba(0, 210, 255, 0.2);
+        }
+
+        .stats-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 24px; margin-top: 32px;
+        }
+        .stat-value { font-size: 28px; font-weight: 700; margin: 12px 0; display: block; }
+        .dashboard-grid {
+            display: grid; grid-template-columns: 2fr 1fr;
+            gap: 24px; margin-top: 32px;
+        }
+
+        /* --- Cohort & Progress --- */
+        .cohort-card {
+            display: flex; align-items: center; gap: 16px; padding: 16px;
+            background: rgba(255,255,255,0.02); border: 1px solid var(--border);
+            border-radius: 12px; transition: 0.3s; margin-bottom: 12px;
+        }
+        .cohort-card:hover { border-color: var(--primary); background: rgba(255,255,255,0.04); }
+        .progress-track { height: 6px; background: #222; border-radius: 3px; margin-top: 8px; overflow: hidden; width: 120px;}
+        .progress-bar { height: 100%; background: linear-gradient(90deg, var(--neon-blue), var(--neon-purple)); border-radius: 3px; }
+
+        .btn-outline {
+            background: transparent; border: 1px solid var(--border); color: var(--foreground);
+            padding: 8px 16px; border-radius: 8px; cursor: pointer; transition: 0.2s; font-size: 13px;
+        }
+        .btn-outline:hover { background: var(--glass-bg); border-color: var(--muted-foreground); }
+        
+        .btn-ghost {
+            background: transparent; border: none; color: var(--muted-foreground);
+            padding: 6px; border-radius: 6px; cursor: pointer; transition: 0.2s;
+        }
+        .btn-ghost:hover { background: var(--glass-bg); color: var(--foreground); }
+
+        .mobile-header {
+            display: none; height: 64px; border-bottom: 1px solid var(--border);
+            position: fixed; top: 0; left: 0; right: 0; z-index: 60;
+            background: var(--background); padding: 0 16px; align-items: center; justify-content: space-between;
+        }
+
+        @media (max-width: 1024px) {
+            aside { transform: translateX(-100%); }
+            aside.mobile-open { transform: translateX(0); }
+            main { margin-left: 0 !important; }
+            .dashboard-grid { grid-template-columns: 1fr; }
+            .mobile-header { display: flex !important; }
+            .top-bar-desktop { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    <div class="mobile-header">
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <div class="logo-icon" style="width: 32px; height: 32px;"><i data-lucide="zap" style="width: 18px;"></i></div>
+            <span style="font-weight: 700; font-size: 14px;">Coach Portal</span>
+        </div>
+        <button class="btn-ghost" onclick="toggleMobileMenu()"><i data-lucide="menu"></i></button>
+    </div>
+
+    <aside id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-container">
+                <div class="logo-icon"><i data-lucide="zap"></i></div>
+                <div class="logo-text">
+                    <h1>Coach Hub</h1>
+                    <p>Training Operations</p>
+                </div>
+            </div>
+            <button class="btn-ghost" onclick="toggleSidebar()"><i data-lucide="menu"></i></button>
+        </div>
+
+        <ul class="nav-list">
+            <li><a class="nav-item active"><i data-lucide="layout-dashboard"></i> <span class="nav-label">Dashboard</span></a></li>
+            <li><a href="dailyEfforts.html" class="nav-item"><i data-lucide="calendar-plus"></i> <span class="nav-label">Log Effort</span></a></li>
+            <li><a href="cohort.html" class="nav-item"><i data-lucide="graduation-cap"></i> <span class="nav-label">My Cohorts</span></a></li>
+            <li><a href="candidates.html" class="nav-item"><i data-lucide="users"></i> <span class="nav-label">My Candidates</span></a></li>
+            <li><a href="reports.html" class="nav-item"><i data-lucide="file-text"></i> <span class="nav-label">My Reports</span></a></li>
+        </ul>
+
+        <div class="sidebar-footer">
+            <div class="user-pill">
+                <div class="avatar">SC</div>
+                <div class="user-info">
+                    <p style="font-size: 14px; font-weight: 500;">Sarah Chen</p>
+                    <p style="font-size: 11px; color: var(--muted-foreground);">Technical Coach</p>
+                </div>
+            </div>
+            <button class="nav-item logout-btn" style="color: var(--destructive); margin-top: 16px;"><i data-lucide="log-out"></i> <span class="nav-label">Logout</span></button>
+        </div>
+    </aside>
+
+    <main id="main-content">
+        <header class="top-bar top-bar-desktop">
+            <div style="font-size: 14px; font-weight: 500; color: var(--muted-foreground);">
+                Assigned Hub: <span style="color: var(--primary);">Bangalore North</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <button class="btn-ghost"><i data-lucide="bell" style="width: 20px;"></i></button>
+                <div style="display: flex; align-items: center; gap: 10px; background: var(--glass-bg); padding: 6px 12px; border-radius: 10px; border: 1px solid var(--border);">
+                    <div class="avatar" style="width: 28px; height: 28px; font-size: 12px;">SC</div>
+                    <span style="font-size: 13px; font-weight: 500;">Sarah Chen</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="content-wrapper">
+            <header class="animate-up" style="margin-top: 20px;">
+                <h1 style="font-size: 32px; font-weight: 700;">Coach Dashboard</h1>
+                <p style="color: var(--muted-foreground); margin-top: 8px;">Track your cohort's daily training and performance.</p>
+            </header>
+
+            <div class="stats-grid">
+                <div class="glass-card animate-up" style="animation-delay: 0.1s;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; color: var(--muted-foreground);">
+                        <span style="font-size: 14px; font-weight: 500;">My Cohorts</span>
+                        <i data-lucide="book-open" style="width: 20px; color: var(--primary);"></i>
+                    </div>
+                    <span class="stat-value">04</span>
+                    <span style="font-size: 12px; color: var(--success);">2 nearing completion</span>
+                </div>
+                <div class="glass-card animate-up" style="animation-delay: 0.2s;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; color: var(--muted-foreground);">
+                        <span style="font-size: 14px; font-weight: 500;">Hours Logged (Week)</span>
+                        <i data-lucide="clock" style="width: 20px; color: var(--neon-purple);"></i>
+                    </div>
+                    <span class="stat-value">32.5h</span>
+                    <span style="font-size: 12px; color: var(--muted-foreground);">Target: 40h</span>
+                </div>
+                <div class="glass-card animate-up" style="animation-delay: 0.3s;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; color: var(--muted-foreground);">
+                        <span style="font-size: 14px; font-weight: 500;">Avg. Performance</span>
+                        <i data-lucide="award" style="width: 20px; color: var(--success);"></i>
+                    </div>
+                    <span class="stat-value">84%</span>
+                    <span style="font-size: 12px; color: var(--success);">↑ 4% from assessments</span>
+                </div>
+                <div class="glass-card animate-up" style="animation-delay: 0.4s;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; color: var(--muted-foreground);">
+                        <span style="font-size: 14px; font-weight: 500;">Next Assessment</span>
+                        <i data-lucide="calendar" style="width: 20px; color: var(--warning);"></i>
+                    </div>
+                    <span class="stat-value">Jan 24</span>
+                    <span style="font-size: 12px; color: var(--warning);">React Module 4</span>
+                </div>
+            </div>
+
+            
+
+            <div class="dashboard-grid">
+                <div class="glass-card animate-up" style="animation-delay: 0.5s;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                        <h2 style="font-size: 18px; font-weight: 600;">Current Batch Progress</h2>
+                        <button class="btn-outline">All Cohorts</button>
+                    </div>
+                    <div class="cohort-list">
+                        <div class="cohort-card">
+                            <div class="logo-icon" style="background: rgba(0,210,255,0.1); color: var(--primary);">
+                                <i data-lucide="graduation-cap"></i>
+                            </div>
+                            <div style="flex: 1;">
+                                <h3 style="font-size: 15px; font-weight: 600;">GenC Batch Alpha</h3>
+                                <p style="font-size: 12px; color: var(--muted-foreground);">Day 14 of 30 • 45 candidates</p>
+                            </div>
+                            <div style="text-align: right;">
+                                <span style="font-size: 13px; font-weight: 600;">65%</span>
+                                <div class="progress-track"><div class="progress-bar" style="width: 65%;"></div></div>
+                            </div>
+                        </div>
+                        <div class="cohort-card">
+                            <div class="logo-icon" style="background: rgba(0,210,255,0.1); color: var(--primary);">
+                                <i data-lucide="graduation-cap"></i>
+                            </div>
+                            <div style="flex: 1;">
+                                <h3 style="font-size: 15px; font-weight: 600;">Java Fullstack - Batch D</h3>
+                                <p style="font-size: 12px; color: var(--muted-foreground);">Day 28 of 30 • 32 candidates</p>
+                            </div>
+                            <div style="text-align: right;">
+                                <span style="font-size: 13px; font-weight: 600;">92%</span>
+                                <div class="progress-track"><div class="progress-bar" style="width: 92%;"></div></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-card animate-up" style="animation-delay: 0.6s;">
+                    <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 24px;">Notifications</h2>
+                    <div class="activity-list">
+                        <div style="display: flex; gap: 12px; margin-bottom: 20px;">
+                            <div style="padding: 6px; border-radius: 50%; background: rgba(245, 158, 11, 0.1); color: var(--warning);"><i data-lucide="alert-triangle" style="width: 14px;"></i></div>
+                            <div>
+                                <p style="font-size: 13px; font-weight: 600;">Weekly Report Missing</p>
+                                <p style="font-size: 11px; color: var(--muted-foreground);">Batch Alpha - Week 2</p>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 12px; margin-bottom: 20px;">
+                            <div style="padding: 6px; border-radius: 50%; background: rgba(16, 185, 129, 0.1); color: var(--success);"><i data-lucide="check" style="width: 14px;"></i></div>
+                            <div>
+                                <p style="font-size: 13px; font-weight: 600;">Log Verified</p>
+                                <p style="font-size: 11px; color: var(--muted-foreground);">Yesterday's effort approved</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-card animate-up" style="margin-top: 32px; animation-delay: 0.7s; border-left: 4px solid var(--primary);">
+                <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 16px;">Coach Actions</h2>
+                <div style="display: flex; flex-wrap: wrap; gap: 12px;">
+                    <button class="btn-outline" style="background: var(--primary); color: #000; border: none; font-weight: 600;">Log Daily Effort</button>
+                    <button class="btn-outline">Update Batch Status</button>
+                    <button class="btn-outline">Candidate Support</button>
+                    <button class="btn-outline">Generate Weekly Summary</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        lucide.createIcons();
+        let isSidebarCollapsed = false;
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('main-content');
+            isSidebarCollapsed = !isSidebarCollapsed;
+            if (isSidebarCollapsed) {
+                sidebar.classList.add('collapsed');
+                mainContent.classList.add('expanded');
+            } else {
+                sidebar.classList.remove('collapsed');
+                mainContent.classList.remove('expanded');
+            }
+        }
+
+        function toggleMobileMenu() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('mobile-open');
+        }
+    </script>
+</body>
+</html>
